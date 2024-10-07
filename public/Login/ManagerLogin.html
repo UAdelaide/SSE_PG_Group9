@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="/Login/signup.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+   <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Manager Login</title>
+</head>
+
+<body>
+
+  <!--#include virtual="guestheader.html" -->
+  <div>
+    <form class="form-signin" id="login1" action="/manager/login" method="POST">
+      <div class="div-button">
+        <button class="btn-block btn1 btn-outline-blue " onclick="volunteerlogin()" type="button">Log In as Volunteer</button>
+        <button class="btn-block btn1 btn-outline-blue " onclick="adminlogin()" type="button">Log In as Admin</button>
+      </div>
+
+      <p class="heading mb-3 font-weight-normal "><b>Log in to your Manager account</b></p>
+      <p class="details">Welcome back! Please enter your details.</p>
+
+      <label for="inputEmail" class="login-label">Email <span class="mandatory">*</span></label>
+      <input type="email" name="username" id="username" class="form-control" placeholder="Email address" required
+        autofocus autocomplete="username">
+      <br>
+
+        <label for="inputPassword" class="login-label">Password <span class="mandatory">*</span></label>
+        <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+
+
+      <div class="checkbox mb-3">
+        <label class="login-label">
+          <!-- <input type="checkbox" value=""> Remember me -->
+        </label>
+      </div>
+      <button class="btn1 btn-primary btn-block" type="submit" >Log In</button>
+
+      <hr class="line">
+      <div class="div-button">
+        <button class="btn-block btn1 btn-outline-blue gficon " type="button" onclick="openAuthWindow('/auth/google', 'Login with Google', 500, 600);"><i class="fa fa-google"></i>Login with
+          Google</button>
+
+
+
+      </div>
+      <p></p>
+      <p class="login-color">Don't have an account? <span><a href="../manager/signup" class="login-link">Sign Up</a></span></p>
+
+
+    </form>
+
+  </div>
+  <div>
+    <a href="/" class="login-link"> &#8592 Return to Home page</a>
+  </div>
+
+  <script>
+
+    <!-- Include your JavaScript code -->
+    $(document).ready(function() {
+      $('#login1').submit(function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const form = $(this);
+        const formData = form.serialize();
+
+        $.ajax({
+          type: 'POST',
+          url: form.attr('action'),
+          data: formData,
+          dataType: 'json',
+          success: function(data) {
+            if (data.success) {
+
+              sessionStorage.setItem("ID",data.manager_id);
+              sessionStorage.setItem("User","Manager");
+              window.location.href = '/manager/dashboard';
+
+            } else {
+              alert(data.errorMessage);
+            }
+          },
+          error: function() {
+            alert("An error occurred. Please try again later.");
+          }
+        });
+      });
+    });
+
+    function volunteerlogin(){
+      window.location.assign('/user/login');
+    }
+    function adminlogin(){
+      window.location.assign('/admin/login');
+    }
+
+    //Google OAuth
+    function receiveMessage(event) {
+      if (event.data.type === 'success') {
+        const user = event.data.user;
+        console.log('User:', user);
+
+        fetch('/managerLoginGOAuth', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+              sessionStorage.setItem("ID",data.manager_id);
+              sessionStorage.setItem("User","Manager");
+              window.location.href = '/manager/dashboard';
+            } else if(data.check){
+            alert('Warning: ' + data.message);
+              window.location.href = '/manager/signup';
+            } else {
+            alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+      }
+    }
+
+    window.addEventListener('message', receiveMessage, false);
+
+    function openAuthWindow(url, title, w, h) {
+      const left = (screen.width / 2) - (w / 2);
+      const top = (screen.height / 2) - (h / 2);
+      return window.open(url, title, `width=${w},height=${h},top=${top},left=${left},location=0,status=1`);
+    }
+
+
+
+  </script>
+</body>
+
+</html>
