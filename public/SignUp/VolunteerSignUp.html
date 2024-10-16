@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="/Login/signup.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+   <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Volunteer Sign Up</title>
+  <style>
+    .form-check-inline {
+      display: inline-block;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <form class="form-signin" id="volunteerForm" onsubmit="registerVolunteer(event)">
+      <div class="div-button">
+        <button class="btn-block btn1 btn-outline-blue " onclick="managersignup()" type="button">Sign Up as a Manager</button>
+      </div>
+
+      <h3 class="h4 mb-3 font-weight-normal">Become a Volunteer</h3>
+      <p>Start your journey!</p>
+
+      <label for="inputfirstname" class="login-label">First name <span class="mandatory">*</span></label>
+      <input type="text" id="inputfirstname" class="form-control" placeholder="Enter your first name" required
+        autofocus>
+      <br>
+
+      <label for="inputlastname" class="login-label">Surname <span class="mandatory">*</span></label>
+      <input type="text" id="inputlastname" class="form-control" placeholder="Enter your surname name" required>
+
+      <br>
+      <label for="inputKey" class="login-label">Contact <span class="mandatory">*</span></label>
+      <input type="text" name="contact" id="inputContact" class="form-control" placeholder="Enter your contact number"
+        required>
+      <br>
+      <label for="inputdob" class="login-label">Date of Birth <span class="mandatory">*</span></label>
+      <input type="date" name="dob" id="inputdob" class="form-control" required>
+      <br>
+
+      <label class="login-label">Gender <span class="mandatory">*</span></label>
+      <div class="form-check form-check-inline">
+        <input type="radio" class="form-check-input" id="genderMale" name="gender" value="Male" required>
+        <label class="form-check-label" for="genderMale">Male</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input type="radio" class="form-check-input" id="genderFemale" name="gender" value="Female" required>
+        <label class="form-check-label" for="genderFemale">Female</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input type="radio" class="form-check-input" id="genderOther" name="gender" value="other" required>
+        <label class="form-check-label" for="genderOther">Other</label>
+      </div>
+      <br>
+      <label for="inputKey" class="login-label">Street <span class="mandatory">*</span></label>
+      <input type="text" name="street" id="inputStreet" class="form-control" placeholder="Enter your street address i.e. 10 North Tce"
+        required>
+      <br>
+      <label for="inputKey" class="login-label">Suburb <span class="mandatory">*</span></label>
+      <input type="text" name="suburb" id="inputSuburb" class="form-control" placeholder="Enter your suburb i.e. Adelaide"
+        required>
+      <br>
+      <label for="inputKey" class="login-label">State <span class="mandatory">*</span></label>
+      <input type="text" name="state" id="inputState" class="form-control" placeholder="Enter your state i.e. SA" required>
+      <br>
+      <label for="inputCountry" class="login-label">Country <span class="mandatory">*</span></label>
+      <select id="inputCountry" name="country" class="form-control" required>
+        <option value="">Select your country</option>
+      </select>
+      <br>
+      <label for="inputKey" class="login-label">Pincode <span class="mandatory">*</span></label>
+      <input type="text" name="pin" id="inputPincode" class="form-control" placeholder="Enter your zipcode i.e. 5000" required>
+      <br>
+      <label for="inputbranch" class="login-label">Branch <span class="mandatory">*</span></label>
+      <select id="inputbranch" name="name" class="form-control" required>
+        <option value="">Select the branch</option>
+      </select>
+
+      <br>
+
+      <label for="inputEmail" class="login-label">Email <span class="mandatory">*</span></label>
+      <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Enter your email address" required
+        autofocus>
+      <br>
+
+      <label for="inputPassword" class="login-label">Password <span class="mandatory">*</span></label>
+      <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Enter Password" required>
+      <br>
+      <label for="inputconfirmPassword" class="login-label">Confirm Password <span class="mandatory">*</span></label>
+      <input type="password" id="inputconfirmPassword" class="form-control" placeholder="Confirm password" required>
+
+      <div id="error-message" style="color: red;"></div>
+      <div class="checkbox mb-3 left-align">
+        <label class="login-label">
+          <input type="checkbox" id="updateNotification" value="yes"> Receive regular email notifications on updates.
+        </label>
+      </div>
+      <div class="checkbox mb-3 left-align">
+        <label class="login-label">
+          <input type="checkbox" id="eventNotification" value="yes"> Receive regular email notifications on events.
+        </label>
+      </div>
+
+
+      <button class="btn1 btn-primary btn-block" type="submit">Sign Up</button>
+
+      <hr>
+      <div class="div-button">
+        <button class="btn-block btn1 btn-outline-blue gficon " type="button" onclick="openAuthWindow('/auth/google', 'Sign In with Google', 500, 600);"><i class="fa fa-google"></i>Sign Up with
+          Google</button>
+
+
+      </div>
+      <div id="oauth-error-message" style="color: red;"></div>
+      <p></p>
+      <p class="login-color">Already have an account? <span><a href="../user/login" class="login-link">Login</a></span></p>
+
+
+    </form>
+
+  </div>
+  <div>
+    <a href="/" class="login-link"> &#8592 Return to Home page</a>
+  </div>
+
+  <script>
+
+    function managersignup(){
+      window.location.href = "../manager/signup";
+    }
+
+
+    // Populate countries in the dropdown
+    function populateCountries() {
+      const countryDropdown = document.getElementById('inputCountry');
+      fetch('https://restcountries.com/v3.1/all')
+        .then(response => response.json())
+        .then(data => {
+          data.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.name.common;
+            option.textContent = country.name.common;
+            countryDropdown.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching countries:', error);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', populateCountries);
+
+    // Populate branches in the dropdown
+    function populateBranches() {
+      const branchDropdown = document.getElementById('inputbranch');
+      fetch('/branches-for-volunteers')
+        .then(response => response.json())
+        .then(data => {
+          data.forEach(branch => {
+            const option = document.createElement('option');
+            option.value = branch.branch_id;
+            option.textContent = branch.name;
+            branchDropdown.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching branches:', error);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', populateBranches);
+
+    // Validate passwords and submit form
+    function registerVolunteer(event) {
+      event.preventDefault();
+
+      const password = document.getElementById('inputPassword').value;
+      const confirmPassword = document.getElementById('inputconfirmPassword').value;
+      const errorMessage = document.getElementById('error-message');
+
+      if (password !== confirmPassword) {
+        errorMessage.textContent = "Passwords do not match.";
+        return false;
+      }
+
+      const formData = {
+        first_name: document.getElementById('inputfirstname').value,
+        last_name: document.getElementById('inputlastname').value,
+        contact: document.getElementById('inputContact').value,
+        dob: document.getElementById('inputdob').value,
+        gender: document.querySelector('input[name="gender"]:checked').value,
+        street: document.getElementById('inputStreet').value,
+        suburb: document.getElementById('inputSuburb').value,
+        state: document.getElementById('inputState').value,
+        country: document.getElementById('inputCountry').value,
+        pin: document.getElementById('inputPincode').value,
+        branch_id: document.getElementById('inputbranch').value,
+        email: document.getElementById('inputEmail').value,
+        password: password,
+        update_notification: document.getElementById('updateNotification').checked ? 'yes' : 'no',
+        event_notification: document.getElementById('eventNotification').checked ? 'yes' : 'no'
+      };
+
+      fetch('/registerVolunteer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Volunteer registered successfully!');
+          window.location.href = '/user/login';
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    //Google OAuth
+    function receiveMessage(event) {
+      if (event.data.type === 'success') {
+        const user = event.data.user;
+        console.log('User:', user);
+        openBranchForm(user);
+      }
+    }
+
+    window.addEventListener('message', receiveMessage, false);
+
+    function openAuthWindow(url, title, w, h) {
+      const left = (screen.width / 2) - (w / 2);
+      const top = (screen.height / 2) - (h / 2);
+      return window.open(url, title, `width=${w},height=${h},top=${top},left=${left},location=0,status=1`);
+    }
+
+    function openBranchForm(user) {
+      fetch('/getBranch')
+        .then(response => response.text())
+        .then(formHtml => {
+          const formWindow = window.open('', 'Branch Form', 500, 600);
+          formWindow.document.write(formHtml);
+          formWindow.document.close();
+          formWindow.onload = () => {
+            formWindow.populateForm(user);
+          };
+        })
+        .catch(error => {
+          console.error('Error loading form:', error);
+        });
+    }
+  </script>
+</body>
+
+</html>
