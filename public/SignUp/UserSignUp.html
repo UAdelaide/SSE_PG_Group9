@@ -23,72 +23,49 @@
       margin-right: 10px;
     }
   </style>
+  <script>
+    $(document).ready(function() {
+        $("#header").load("/Login/header.html");
+        $("#footer").load("/Login/footer.html");
+    });
+  </script>
 </head>
 
 <body>
+  <div id="header"></div>
   <div>
     <form class="form-signin" id="volunteerForm" onsubmit="registerVolunteer(event)">
-      <div class="div-button">
-        <button class="btn-block btn1 btn-outline-blue " onclick="managersignup()" type="button">Sign Up as a Manager</button>
-      </div>
-
-      <h3 class="h4 mb-3 font-weight-normal">Become a Volunteer</h3>
+      <h3 class="h4 mb-3 font-weight-normal">Register your account</h3>
       <p>Start your journey!</p>
+      <br>
 
       <label for="inputfirstname" class="login-label">First name <span class="mandatory">*</span></label>
       <input type="text" id="inputfirstname" class="form-control" placeholder="Enter your first name" required
         autofocus>
       <br>
 
-      <label for="inputlastname" class="login-label">Surname <span class="mandatory">*</span></label>
+      <label for="inputlastname" class="login-label">Last Name <span class="mandatory">*</span></label>
       <input type="text" id="inputlastname" class="form-control" placeholder="Enter your surname name" required>
 
       <br>
-      <label for="inputKey" class="login-label">Contact <span class="mandatory">*</span></label>
+      <!-- <label for="inputKey" class="login-label">Contact <span class="mandatory">*</span></label>
       <input type="text" name="contact" id="inputContact" class="form-control" placeholder="Enter your contact number"
         required>
-      <br>
+      <br> -->
       <label for="inputdob" class="login-label">Date of Birth <span class="mandatory">*</span></label>
       <input type="date" name="dob" id="inputdob" class="form-control" required>
       <br>
-
-      <label class="login-label">Gender <span class="mandatory">*</span></label>
-      <div class="form-check form-check-inline">
-        <input type="radio" class="form-check-input" id="genderMale" name="gender" value="Male" required>
-        <label class="form-check-label" for="genderMale">Male</label>
-      </div>
-      <div class="form-check form-check-inline">
-        <input type="radio" class="form-check-input" id="genderFemale" name="gender" value="Female" required>
-        <label class="form-check-label" for="genderFemale">Female</label>
-      </div>
-      <div class="form-check form-check-inline">
-        <input type="radio" class="form-check-input" id="genderOther" name="gender" value="other" required>
-        <label class="form-check-label" for="genderOther">Other</label>
-      </div>
-      <br>
-      <label for="inputKey" class="login-label">Street <span class="mandatory">*</span></label>
+      <label for="inputKey" class="login-label">Country of Citizenship <span class="mandatory">*</span></label>
       <input type="text" name="street" id="inputStreet" class="form-control" placeholder="Enter your street address i.e. 10 North Tce"
         required>
       <br>
-      <label for="inputKey" class="login-label">Suburb <span class="mandatory">*</span></label>
-      <input type="text" name="suburb" id="inputSuburb" class="form-control" placeholder="Enter your suburb i.e. Adelaide"
+      <label for="inputKey" class="login-label">Language </label>
+      <input type="text" name="street" id="inputStreet" class="form-control" placeholder="Enter your street address i.e. 10 North Tce"
         required>
       <br>
-      <label for="inputKey" class="login-label">State <span class="mandatory">*</span></label>
-      <input type="text" name="state" id="inputState" class="form-control" placeholder="Enter your state i.e. SA" required>
-      <br>
-      <label for="inputCountry" class="login-label">Country <span class="mandatory">*</span></label>
-      <select id="inputCountry" name="country" class="form-control" required>
-        <option value="">Select your country</option>
-      </select>
-      <br>
-      <label for="inputKey" class="login-label">Pincode <span class="mandatory">*</span></label>
-      <input type="text" name="pin" id="inputPincode" class="form-control" placeholder="Enter your zipcode i.e. 5000" required>
-      <br>
-      <label for="inputbranch" class="login-label">Branch <span class="mandatory">*</span></label>
-      <select id="inputbranch" name="name" class="form-control" required>
-        <option value="">Select the branch</option>
-      </select>
+      <label for="inputKey" class="login-label">Mobile <span class="mandatory">*</span></label>
+      <input type="text" name="contact" id="inputContact" class="form-control" placeholder="Enter your contact number"
+        required>
 
       <br>
 
@@ -106,17 +83,16 @@
       <div id="error-message" style="color: red;"></div>
       <div class="checkbox mb-3 left-align">
         <label class="login-label">
-          <input type="checkbox" id="updateNotification" value="yes"> Receive regular email notifications on updates.
-        </label>
-      </div>
-      <div class="checkbox mb-3 left-align">
-        <label class="login-label">
-          <input type="checkbox" id="eventNotification" value="yes"> Receive regular email notifications on events.
+          <input type="checkbox" id="updateNotification" value="yes"> COVID-19 Vaccinated
         </label>
       </div>
 
+      <br>
 
-      <button class="btn1 btn-primary btn-block" type="submit">Sign Up</button>
+      <div class="div-button">
+        <button class="btn1 btn-primary btn-block" type="submit">Sign Up</button>
+      </div>
+
 
       <hr>
       <div class="div-button">
@@ -136,6 +112,8 @@
   <div>
     <a href="/" class="login-link"> &#8592 Return to Home page</a>
   </div>
+  <br><br>
+  <div id="footer"></div>
 
   <script>
 

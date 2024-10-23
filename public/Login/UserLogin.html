@@ -16,7 +16,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Volunteer Login</title>
+  <title>Login</title>
+  <script>
+    // Load the header content using jQuery AJAX
+    $(document).ready(function() {
+        $("#header").load("/Login/header.html");
+        $("#footer").load("/Login/footer.html");
+    });
+</script>
 </head>
 
 <body>
@@ -24,12 +31,8 @@
   <!--#include virtual="guestheader.html" -->
   <div>
   <form class="form-signin" id="login1" action="/user/login" method="POST">
-    <div class="div-button">
-    <button class="btn-block btn1 btn-outline-blue "  onclick="managerlogin()" type="button">Log In as Manager</button>
-    <button class="btn-block btn1 btn-outline-blue " onclick="adminlogin()" type="button">Log In as Admin</button>
-    </div>
 
-    <p class="heading mb-3 font-weight-normal "><b>Log in to your Volunteer account</b></p>
+    <h3 class="heading mb-3 font-weight-normal "><b>Log in to your account</b></h3>
     <p class="details">Welcome back! Please enter your details.</p>
 
     <label for="inputEmail" class="login-label">Email <span class="mandatory">*</span></label>
@@ -43,8 +46,7 @@
 
     <div class="checkbox mb-3">
       <label class="login-label">
-        <!-- <input type="checkbox" value=""> Remember me -->
-
+        <input type="checkbox" value=""> Remember me
       </label>
     </div>
     <button class="btn1 btn-primary btn-block" type="submit" >Log In</button>
@@ -65,18 +67,11 @@
 <div>
   <a href="/" class="login-link"> &#8592 Return to Home page</a>
 </div>
-  <footer class="footer"></footer>
+<br><br>
+  <footer id="footer"></footer>
 
   <script>
     // JavaScript function to handle sign-in process
-
-    function adminlogin(){
-      window.location.assign('/admin/login');
-    }
-    function managerlogin(){
-      window.location.assign('/manager/login');
-    }
-
 
     $(document).ready(function() {
       $('#login1').submit(function(event) {

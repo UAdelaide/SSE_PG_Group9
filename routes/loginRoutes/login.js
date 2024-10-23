@@ -4,7 +4,7 @@ var path = require('path');
 var mysql = require('mysql');
 
 router.get('/user/login', function(req, res, next) {
-    var filePath = path.join(__dirname, '..', '..', 'public', 'Login', 'VolunteerLogin.html');
+    var filePath = path.join(__dirname, '..', '..', 'public', 'Login', 'UserLogin.html');
     res.sendFile(filePath);
 });
 
@@ -14,7 +14,7 @@ router.post('/user/login', function(req, res, next) {
     var password = req.body.password;
 
     if (username && password) {
-        var query = `SELECT * FROM Volunteers WHERE email = "${username}"`;
+        var query = `SELECT * FROM Users WHERE email = "${username}"`;
         req.pool.query(query,function(error, data){
 
             if(data.length>0){

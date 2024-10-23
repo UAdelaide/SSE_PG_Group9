@@ -27,9 +27,9 @@ body {
 }
 
 .btn1{
-    border-color: #4F84C3;
+    border-color: #000000;
     background-color: #fff;
-    color: #4F84C3;
+    color: #000000;
     padding: 15px;
     height: 44px;
     padding-top: 5px;
@@ -38,7 +38,7 @@ body {
     border-radius: 8px;
 }
 .btn1:hover{
-    background-color: #4F84C3;
+    background-color: #000000;
     color:white;
 }
 .div-button{
@@ -51,7 +51,7 @@ body {
     gap: 0;
 }
 .login-link {
-    color: #4F84C3;
+    color: #000000;
     text-decoration: underline;
 }
 .login-color{
@@ -124,4 +124,20 @@ margin-bottom: 10px;
 
 .left-align {
   text-align: left;
+}
+
+.btn1.btn-primary.btn-block{
+  border-color: #000000;
+  background-color: #000000;
+  color: #fff;
+  padding: 15px;
+  height: 44px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+.btn1.btn-primary.btn-block:hover{
+  background-color: #fff;
+  color:#000;
 }

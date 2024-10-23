@@ -12,7 +12,7 @@ const GOOGLE_CLIENT_ID = '834084915754-oal2q2b0nfn521ekhvlo9ark0at3ri1e.apps.goo
 const GOOGLE_CLIENT_SECRET = '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';
 
 router.get('/user/signup', function(req, res, next) {
-    var filePath = path.join(__dirname, '..', '..', 'public', 'SignUp', 'VolunteerSignUp.html');
+    var filePath = path.join(__dirname, '..', '..', 'public', 'SignUp', 'UserSignUp.html');
     res.sendFile(filePath);
 });
 
