@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../stylesheets/style.css">
+    <title>Header</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        @media screen and (max-width: 1165px) and (min-width: 768px) {
+    .navbar .logo img {
+        width: 15vw; /* Adjust the size as needed */
+        min-width: 130px;
+        max-width: 200px;
+        height: auto; /* Maintain the aspect ratio */
+    }
+    .navbar .nav-links .nav-link {
+        font-size: 1.5vmax; /* Adjust the values as needed */
+    }
+    .btn-link {
+        font-size: 1.5vmax;
+        padding: 5px;
+    }
+}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="background">
+            <div class="logo">
+                <a href="/">
+                    <img src="/images/homecare_logo.png" alt="HH">
+                </a>
+            </div>
+            <div class="burger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <!-- <ul class="nav-links">
+                <li><a href="/what_we_do" class="nav-link">What we do</a></li>
+                <li><a href="/get_involved" class="nav-link">Get involved</a></li>
+                <li><a href="/about" class="nav-link">About</a></li>
+                <li><a href="/contact" class="nav-link">Contact</a></li>
+                <li>
+                    <button type="button" class="btn btn-dark btn-lg" onclick="window.location.href='/user/login'">Login</button>
+                </li>
+            </ul> -->
+        </div>
+    </nav>
+
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            const burger = document.querySelector('.burger');
+            navLinks.classList.toggle('active');
+            burger.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

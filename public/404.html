@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <title>Page not found</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #errmsg {
+            margin: 40px auto;
+            max-width: 80vw;
+        }
+        #errmsg h2 {
+            font-size: 45px;
+        }
+        #errmsg p {
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            #errmsg {
+                max-width: 90vw;
+                margin: 20px auto;
+            }
+            #errmsg h2 {
+                font-size: 5vmax;
+            }
+            #errmsg p {
+                font-size: 3vmax;
+            }
+        }
+    </style>
+    <script>
+        // Load the header content using jQuery AJAX
+        $(document).ready(function() {
+            $("#header").load("guestheader.html");
+        });
+    </script>
+</head>
+<body>
+    <div id="header"></div>
+
+    <div class="header-title">
+        <div class="container">
+            <h1>Page not found</h1>
+        </div>
+    </div>
+    <div id="errmsg" class="container">
+        <h2>Oops! We can't seem to find the page you're looking for.</h2>
+        <p>The page may have been moved, deleted, or the URL might be incorrect.</p>
+        <p>Try using the links on the header to navigate to a different page, or click our Logo on the top right to return to our home page.</p>
+        <p>If you need further assistance, please contact our support team at support.homecarepro@gmail.com</p>
+    </div>
+</body>
+</html>
