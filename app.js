@@ -42,6 +42,8 @@ app.use(passport.session());
 
 var dbConnectionPool = mysql.createPool({
     host: '127.0.0.1',
+    user:"root",
+  password:'',
     database: 'sse'
 });
 
@@ -85,7 +87,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
 
 
 module.exports = app;
