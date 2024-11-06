@@ -35,7 +35,8 @@ app.use(bodyParser.json());
 app.use(session({
     secret : 'webslesson',
     resave : false,
-    saveUninitialized : true
+    saveUninitialized : true,
+    cookie: { secure: false }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -51,6 +52,10 @@ app.use(function(req, res, next) {
     req.pool = dbConnectionPool;
     next();
 });
+
+
+
+
 
 app.use(logger('dev'));
 app.use(express.json());

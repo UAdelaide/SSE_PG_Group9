@@ -4,8 +4,14 @@ var router = express.Router();
 var path = require('path');
 var mysql = require('mysql');
 
-const bcrypt = require('bcrypt');
 
+router.get('/home.html', (req, res) => {
+  if (req.session && req.session.userId) {
+      res.render('/home.html'); // Render homepage if session exists
+  } else {
+      res.redirect('/Login.html'); // Redirect to login if no session
+  }
+});
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -68,5 +74,6 @@ router.post('/Login', function(req, res, next) {
     return res.json({ success: false, errorMessage: 'Please enter valid email and password!' });
   }
 });
+
 
 module.exports = router;
