@@ -1,29 +1,79 @@
 var express = require('express');
 var path = require('path');
 var router = express.Router();
-var webpush = require('web-push');
-var bodyParser = require('body-parser');
+var path = require('path');
+var mysql = require('mysql');
 
-var app = express();
 
-app.use(bodyParser.json());
-
-// Import the guestRoutes router
-var loginRoutes = require('./loginRoutes/login');
-var signUpRoutes = require('./signUpRoutes/signUp');
-const session = require('express-session');
-
-// GET home page
+router.get('/home.html', (req, res) => {
+  if (req.session && req.session.userId) {
+      res.render('/home.html'); // Render homepage if session exists
+  } else {
+      res.redirect('/Login.html'); // Redirect to login if no session
+  }
+});
+/* GET home page. */
 router.get('/', function(req, res, next) {
-  //res.render('index', { title: 'Express' });
-  res.render('index',{title:'Express',session:req.session});
+  res.render('index', { title: 'Express' });
+});
+
+router.get('/list', function(req, res, next) {
+  req.pool.getConnection(function(err, connection) {
+    if(err){
+      res.sendStatus(500);
+      return;
+    }
+    var query = 'select * from users;';
+    connection.query(query, function(er, rows, fields){
+      connection.release();
+      if(er){
+        res.sendStatus(500);
+        return;
+      }
+      res.send(rows);
+    });
+  });
 });
 
 
-//Mount SignUp Routes
-router.use('/', signUpRoutes);
+router.get('/Login', function(req, res, next) {
+  var filePath = path.join(__dirname, '..', '..', 'public',  'Login.html');
+  res.sendFile(filePath);
+});
 
-//Mount Login Routes
-router.use('/', loginRoutes);
+// POST login
+router.post('/Login', function(req, res, next) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  if (username && password) {
+    // Use parameterized queries to avoid SQL injection
+    var query = 'SELECT * FROM users WHERE email = ?';
+    req.pool.query(query, [username], function(error, data) {
+      if (error) {
+        console.error('Database query error:', error);
+        return res.json({ success: false, errorMessage: 'Database error. Please try again later.' });
+      }
+
+      // Check if any user is returned from the database
+      if (data.length > 0) {
+        const user = data[0]; // Get the first user from the result set
+
+        // Compare plain text password
+        if (user.password === password) { // Ideally, hash and compare passwords
+          req.session. id = user.id; // Store manager ID in session
+          return res.json({ success: true, id: req.session.id });
+        } else {
+          return res.json({ success: false, errorMessage: 'Incorrect password. Please enter a valid password!' });
+        }
+      } else {
+        return res.json({ success: false, errorMessage: 'Incorrect email ID. Please enter a valid email!' });
+      }
+    });
+  } else {
+    return res.json({ success: false, errorMessage: 'Please enter valid email and password!' });
+  }
+});
+
 
 module.exports = router;

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <link rel="stylesheet" href="/Login/signup.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+   <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Login</title>
+  <style>
+    .header {
+    font-size: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FBFAF9;
+    padding: 1rem 5%; /* Adjust padding to be relative to viewport width */
+}
+footer {
+
+bottom: 0;
+left: 0;
+height: 200px;
+width: 100%;
+background-color: #f4f4f4;
+padding: 1rem;
+text-align: center;
+box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure the page fills the viewport height */
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+
+
+}
+
+/* Main content should take up all available space */
+main {
+    flex: 1;
+
+}
+
+/* Footer styling */
+footer {
+    height: 200px;
+    width: 100%;
+    background-color: #f4f4f4;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+  </style>
+</head>
+
+<body>
+  <nav class="header">
+    <a href="/"> <img src="/images/image 4.png" alt="logo.png" class="nav-link-img" style=" width: 200px; margin-left: 50px; ">
+     </a>
+</nav>
+<main>
+  <!--#include virtual="guestheader.html" -->
+  <div>
+
+    <form class="form-signin" action="/Login" method="POST" id="login1">
+
+      <p class="heading mb-3 font-weight-normal " style="text-align: center; font-size: x-large;"><b>Log in to your account</b></p>
+      <p class="details" style="text-align: center;font-size: small;">Welcome back! Please enter your details.</p>
+
+      <label for="inputEmail" class="login-label">Email <span class="mandatory">*</span></label>
+      <input type="email" name="username" id="username" class="form-control" placeholder="Email address" required
+        autofocus autocomplete="username">
+      <br>
+
+        <label for="inputPassword" class="login-label">Password <span class="mandatory">*</span></label>
+        <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+
+
+      <div class="checkbox mb-3">
+        <label class="login-label">
+          <input type="checkbox" value=""> Remember me
+        </label>
+      </div>
+      <button class="btn1 btn-primary btn-block" type="submit" >Log In</button>
+
+      <hr class="line">
+
+      <div class="div-button">
+        <button class="btn-block btn1 btn-outline-blue gficon " type="button" onclick="openAuthWindow('/auth/google', 'Login with Google', 500, 600);"><i class="fa fa-google"></i>Login with Google</button>
+
+
+      </div>
+      <p></p>
+      <p class="login-color" style="text-align: center;">Don't have an account? <span><a href="../signup" class="login-link">Sign Up</a></span></p>
+
+
+
+    </form>
+
+  </div>
+
+</main>
+  <footer class="footer"></footer>
+
+  <script>
+ $('.footer').load('Login/footer.html');
+
+
+ $(document).ready(function() {
+  $('#login1').submit(function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const form = $(this);
+    const formData = form.serialize();
+
+    $.ajax({
+      type: 'POST',
+      url: form.attr('action'),
+      data: formData,
+      dataType: 'json',
+      success: function(data) {
+        if (data.success) {
+          // Store only the ID in session storage
+          sessionStorage.setItem("ID", data.id);
+          window.location.href = '/home.html';
+        } else {
+          alert(data.errorMessage);
+        }
+      },
+      error: function() {
+        alert("An error occurred. Please try again later.");
+      }
+    });
+  });
+});
+
+
+  </script>
+</body>
+
+</html>

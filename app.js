@@ -35,13 +35,16 @@ app.use(bodyParser.json());
 app.use(session({
     secret : 'webslesson',
     resave : false,
-    saveUninitialized : true
+    saveUninitialized : true,
+    cookie: { secure: false }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 
 var dbConnectionPool = mysql.createPool({
     host: '127.0.0.1',
+    user:"root",
+  password:'',
     database: 'sse'
 });
 
@@ -49,6 +52,10 @@ app.use(function(req, res, next) {
     req.pool = dbConnectionPool;
     next();
 });
+
+
+
+
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -85,7 +92,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
 
 
 module.exports = app;
