@@ -2,7 +2,11 @@ var express = require('express');
 var path = require('path');
 var router = express.Router();
 var path = require('path');
-var mysql = require('mysql');
+var mysql = require('mysql2');
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
+var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
+const { google } = require('googleapis');
 
 
 router.get('/home.html', (req, res) => {
@@ -12,6 +16,7 @@ router.get('/home.html', (req, res) => {
       res.redirect('/Login.html'); // Redirect to login if no session
   }
 });
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -61,7 +66,7 @@ router.post('/Login', function(req, res, next) {
 
         // Compare plain text password
         if (user.password === password) { // Ideally, hash and compare passwords
-          req.session. id = user.id; // Store manager ID in session
+          req.session. id = user.id; // Store user ID in session
           return res.json({ success: true, id: req.session.id });
         } else {
           return res.json({ success: false, errorMessage: 'Incorrect password. Please enter a valid password!' });
@@ -75,5 +80,213 @@ router.post('/Login', function(req, res, next) {
   }
 });
 
+//Sign Up
+router.post('/registerUser', (req, res) => {
+  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = req.body;
+
+  req.pool.getConnection((err, connection) => {
+    if(err) {
+      console.log(err);
+      res.sendStatus(500);
+      return;
+    }
+
+    // Insert the new volunteer
+    const sql = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    connection.query(sql, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (err, results) => {
+      if(err) {
+        console.log(err);
+        connection.release();
+        res.status(500).json({ success: false, message: 'Database insertion error' });
+        return;
+      }
+
+      const user_id = results.insertId;
+      req.session.user_id = user_id;
+      connection.release();
+      res.status(200).json({ success: true, user_id:req.session.user_id, message: 'User registered successfully!' });
+    });
+  });
+});
+
+//Google OAuth Setup
+const GOOGLE_CLIENT_ID = '877734274250-5ck044eq6fjdahku4hb87rsstikr0n6h.apps.googleusercontent.com';
+const GOOGLE_CLIENT_SECRET = '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';
+
+passport.use(new GoogleStrategy({
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:8080/auth/google/callback",
+    scope: ['profile',
+      'email',
+      'https://www.googleapis.com/auth/user.birthday.read',
+      'https://www.googleapis.com/auth/user.gender.read',
+      'https://www.googleapis.com/auth/user.phonenumbers.read']
+  },
+    function (accessToken, refreshToken, profile, done) {
+      // Initialize OAuth2 client with the access token
+      const oauth2Client = new google.auth.OAuth2();
+      oauth2Client.setCredentials({ access_token: accessToken });
+
+      // Google People API
+      const service = google.people({ version: 'v1', auth: oauth2Client });
+
+      // Fetch user details from Google People API
+      service.people.get({
+        resourceName: 'people/me',
+        personFields: 'birthdays,genders,addresses,phoneNumbers',
+      }, (err, response) => {
+        if (err) {
+          console.error('Error fetching user details:', err);
+          return done(err);
+        }
+
+        var user = {};
+
+        // Extract additional user details if available
+        if (response && response.data) {
+          const data = response.data;
+          user.first_name = profile.name.familyName && profile.name.familyName.length > 0 ? profile.name.givenName : null;
+          user.last_name = profile.name.familyName && profile.name.familyName.length > 0 ? profile.name.familyName : null,
+            user.email = profile.emails[0].value,
+            user.dob = data.birthdays && data.birthdays.length > 0 && data.birthdays[0].date.year && data.birthdays[0].date.month && data.birthdays[0].date.day && data.birthdays[0].date.year > 0 && data.birthdays[0].date.month > 0 && data.birthdays[0].date.day > 0 ? data.birthdays[0].date.year + '-' + data.birthdays[0].date.month + '-' + data.birthdays[0].date.day : null;
+          user.gender = data.genders && data.genders.length > 0 ? data.genders[0].value : null;
+          //user.address = data.addresses && data.addresses.length > 0 ? data.addresses[0].formattedValue : null;
+          user.phoneNumber = data.phoneNumbers && data.phoneNumbers.length > 0 ? data.phoneNumbers[0].value.replace(/ /g, '') : null;
+        }
+        return done(null, user);
+      });
+    }
+  ));
+
+  passport.serializeUser((user, done) => done(null, user));
+  passport.deserializeUser((obj, done) => done(null, obj));
+
+  router.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+  });
+
+router.get('/auth/google',
+  passport.authenticate('google', {
+    scope: ['profile',
+      'email',
+      'https://www.googleapis.com/auth/user.birthday.read',
+      'https://www.googleapis.com/auth/user.gender.read',
+      'https://www.googleapis.com/auth/user.phonenumbers.read']
+  })
+);
+
+router.get('/auth/google/login',
+  passport.authenticate('google', {
+    scope: ['email']  //Only getting required fields for security (login)
+  })
+);
+
+router.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/auth/failure' }),
+  (req, res) => {
+    res.send(`
+      <script>
+        window.opener.postMessage({ type: 'success', user: ${JSON.stringify(req.user)} }, '*');
+        window.close();
+      </script>
+    `);
+  }
+);
+
+router.get('/auth/failure', function (req, res) {
+  res.send(`
+      <script>
+        window.close();
+        alert('You have not granted the required permissions. Please try again or sign up via the form!');
+      </script>
+    `);
+});
+
+//OAuth Signup
+router.post('/registerUserGOauth', (req, res) => {
+  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = req.body;
+
+  req.pool.getConnection(function(err, connection) {
+    if (err) {
+      res.sendStatus(500);
+      return;
+    }
+
+    // Check if user already exists
+    const checkUserQuery = 'SELECT * FROM users WHERE email = ?';
+    connection.query(checkUserQuery, [email], function(error, data) {
+      if (error) {
+        connection.release();
+        res.status(500).json({ success: false, message: 'Database query error' });
+        return;
+      }
+
+      if (data.length > 0) {
+        connection.release();
+        res.status(200).json({ success: false, check: true, message: 'Volunteer already exists! Please login' });
+      } else {
+          // Insert the new user
+          const insertUserQuery = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+          connection.query(insertUserQuery, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (insertError) => {
+            if (insertError) {
+              connection.release();
+              console.log(insertError);
+              res.status(500).json({ success: false, message: 'Database insertion error' });
+              return;
+            }
+
+            // Retrieve the newly inserted user's ID and store it in session
+            connection.query(checkUserQuery, [email], function(selectError, newData) {
+              connection.release();
+              if (selectError) {
+                res.status(500).json({ success: false, message: 'Database query error' });
+                return;
+              }
+
+              if (newData.length > 0) {
+                req.session.volunteer_id = newData[0].volunteer_id;
+                res.status(200).json({ success: true, volunteer_id:req.session.volunteer_id, message: 'Volunteer registered successfully!' });
+              } else {
+                res.json({ success: false, message: 'Registration error. Please try authentication again!' });
+              }
+            });
+          });
+        }
+      });
+    });
+});
+
+router.post('/userLoginGOAuth', function(req, res, next) {
+
+  var username = req.body.user.email;
+
+  if (username) {
+      var query = `SELECT * FROM users WHERE email = "${username}"`;
+      req.pool.query(query,function(error, data){
+          if (error) {
+              console.log(error);
+              res.sendStatus(500);
+              return;
+            }
+
+          if(data.length>0){
+              for(var count=0;count<data.length;count++){
+                      req.session.user_id=data[count].user_id;
+                      res.json({ success: true, user_id: req.session.user_id });
+              }
+          }else{
+              res.json({ success: false, check: true, message: 'Please sign in before login!' });
+          }
+      });
+  } else {
+      res.json({ success: false, message: 'Invalid username!' });
+  }
+});
+
+router.get('/getVacDetails', (req, res) => {
+    var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
+    res.sendFile(filePath);
+});
 
 module.exports = router;

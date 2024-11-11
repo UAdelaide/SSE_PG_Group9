@@ -15,7 +15,7 @@ var session = require('express-session');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
-var mysql = require('mysql');
+var mysql = require('mysql2');
 
 var app = express();
 
@@ -38,13 +38,14 @@ app.use(session({
     saveUninitialized : true,
     cookie: { secure: false }
 }));
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 app.use(passport.initialize());
 app.use(passport.session());
 
 var dbConnectionPool = mysql.createPool({
     host: '127.0.0.1',
     user:"root",
-  password:'',
+    password:'',
     database: 'sse'
 });
 
@@ -61,7 +62,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', '..', 'public')));
 
 // Initialize Passport and sessions
 app.use(passport.initialize());
