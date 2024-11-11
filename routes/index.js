@@ -7,6 +7,7 @@ var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { google } = require('googleapis');
+const nodemailer = require('nodemailer');
 
 
 router.get('/home.html', (req, res) => {
@@ -203,6 +204,7 @@ router.get('/auth/failure', function (req, res) {
     `);
 });
 
+
 //OAuth Signup
 router.post('/registerUserGOauth', (req, res) => {
   const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = req.body;
@@ -257,6 +259,7 @@ router.post('/registerUserGOauth', (req, res) => {
     });
 });
 
+// OAuth Login
 router.post('/userLoginGOAuth', function(req, res, next) {
 
   var username = req.body.user.email;
@@ -284,9 +287,40 @@ router.post('/userLoginGOAuth', function(req, res, next) {
   }
 });
 
+// Render form to get vaccination details while OAuth signin
 router.get('/getVacDetails', (req, res) => {
     var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
     res.sendFile(filePath);
 });
+
+// Configure nodemailer with Ethereal
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  port: 587,
+  auth: {
+      user: 'judy.cormier48@ethereal.email',
+      pass: 'CGcHxct2yNF8M8gnCd'
+  }
+});
+
+// Function to send email notifications using Ethereal
+function sendEmailNotification(recipients, subject, message) {
+  const mailOptions = {
+    from: 'notification@hoemcarepro.com',
+    to: recipients,
+    subject: subject,
+    text: message,
+    html: `<p>${message}</p>`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+      return;
+    }
+    console.log('Message sent: %s', info.messageId);
+    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+  });
+}
 
 module.exports = router;
