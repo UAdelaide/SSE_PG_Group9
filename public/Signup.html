@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="/Login/signup.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+   <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Sign Up</title>
+  <style>
+    .form-check-inline {
+      display: inline-block;
+      margin-right: 10px;
+    }
+  </style>
+  <script>
+    $(document).ready(function() {
+        $("#header").load("/Login/header.html");
+        $("#footer").load("/Login/footer.html");
+    });
+  </script>
+</head>
+
+<body>
+  <div id="header"></div>
+  <div>
+    <form class="form-signin" id="volunteerForm" onsubmit="registerUser(event)">
+      <h3 class="h4 mb-3 font-weight-normal">Register your account</h3>
+      <p>Start your journey!</p>
+      <br>
+
+      <label for="inputfirstname" class="login-label">First name <span class="mandatory">*</span></label>
+      <input type="text" id="inputfirstname" class="form-control" placeholder="Enter your first name" required
+        autofocus>
+      <br>
+
+      <label for="inputlastname" class="login-label">Last Name <span class="mandatory">*</span></label>
+      <input type="text" id="inputlastname" class="form-control" placeholder="Enter your surname name" required>
+
+      <br>
+      <label for="inputdob" class="login-label">Date of Birth <span class="mandatory">*</span></label>
+      <input type="date" name="dob" id="inputdob" class="form-control" required>
+      <br>
+      <label for="inputcoc" class="login-label">Country of Citizenship <span class="mandatory">*</span></label>
+      <input type="text" name="street" id="inputcoc" class="form-control" placeholder="Enter your street address i.e. 10 North Tce"
+        required>
+      <br>
+      <label for="inputlang" class="login-label">Language </label>
+      <input type="text" name="street" id="inputlang" class="form-control" placeholder="Enter your street address i.e. 10 North Tce"
+        required>
+      <br>
+      <label for="inputContact" class="login-label">Mobile <span class="mandatory">*</span></label>
+      <input type="text" name="contact" id="inputContact" class="form-control" placeholder="Enter your contact number"
+        required>
+
+      <br>
+
+      <label for="inputEmail" class="login-label">Email <span class="mandatory">*</span></label>
+      <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Enter your email address" required
+        autofocus>
+      <br>
+
+      <label for="inputPassword" class="login-label">Password <span class="mandatory">*</span></label>
+      <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Enter Password" required>
+      <br>
+      <label for="inputconfirmPassword" class="login-label">Confirm Password <span class="mandatory">*</span></label>
+      <input type="password" id="inputconfirmPassword" class="form-control" placeholder="Confirm password" required>
+
+      <div id="error-message" style="color: red;"></div>
+      <div class="checkbox mb-3 left-align">
+        <label class="login-label">
+          <input type="checkbox" id="vaccinated" value="yes"> COVID-19 Vaccinated
+        </label>
+      </div>
+
+      <br>
+
+      <div class="div-button">
+        <button class="btn1 btn-primary btn-block" type="submit">Sign Up</button>
+      </div>
+
+
+      <hr>
+      <div class="div-button">
+        <button class="btn-block btn1 btn-outline-blue gficon " type="button" onclick="openAuthWindow('/auth/google', 'Sign In with Google', 500, 600);"><i class="fa fa-google"></i>Sign Up with
+          Google</button>
+
+
+      </div>
+      <div id="oauth-error-message" style="color: red;"></div>
+      <p></p>
+      <p class="login-color">Already have an account? <span><a href="Login.html" class="login-link">Login</a></span></p>
+
+
+    </form>
+
+  </div>
+  <div>
+    <a href="/" class="login-link"> &#8592 Return to Home page</a>
+  </div>
+  <br><br>
+  <div id="footer"></div>
+
+  <script>
+
+    // Validate passwords and submit form
+    function registerUser(event) {
+      event.preventDefault();
+
+      const password = document.getElementById('inputPassword').value;
+      const confirmPassword = document.getElementById('inputconfirmPassword').value;
+      const errorMessage = document.getElementById('error-message');
+
+      if (password !== confirmPassword) {
+        errorMessage.textContent = "Passwords do not match.";
+        return false;
+      }
+
+    //   first_name, last_name, dob, country, language, mobile, email, password, vaccinated
+      const formData = {
+        first_name: document.getElementById('inputfirstname').value,
+        last_name: document.getElementById('inputlastname').value,
+        dob: document.getElementById('inputdob').value,
+        country: document.getElementById('inputcoc').value,
+        language: document.getElementById('inputlang').value,
+        mobile: document.getElementById('inputContact').value,
+        email: document.getElementById('inputEmail').value,
+        password: password,
+        vaccinated: document.getElementById('vaccinated').checked ? 'yes' : 'no',
+      };
+
+      fetch('/registerUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('User registered successfully!');
+          window.location.href = 'Login.html';
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    //Google OAuth
+    function receiveMessage(event) {
+      if (event.data.type === 'success') {
+        const user = event.data.user;
+        console.log('User:', user);
+        openVacForm(user);
+      }
+    }
+
+    window.addEventListener('message', receiveMessage, false);
+
+    function openAuthWindow(url, title, w, h) {
+      const left = (screen.width / 2) - (w / 2);
+      const top = (screen.height / 2) - (h / 2);
+      return window.open(url, title, `width=${w},height=${h},top=${top},left=${left},location=0,status=1`);
+    }
+
+    function openVacForm(user) {
+      fetch('/getVacDetails')
+        .then(response => response.text())
+        .then(formHtml => {
+          const formWindow = window.open('', 'Branch Form', 500, 600);
+          formWindow.document.write(formHtml);
+          formWindow.document.close();
+          formWindow.onload = () => {
+            formWindow.populateForm(user);
+          };
+        })
+        .catch(error => {
+          console.error('Error loading form:', error);
+        });
+    }
+
+  </script>
+</body>
+
+</html>

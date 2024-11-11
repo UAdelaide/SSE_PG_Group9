@@ -334,7 +334,7 @@ h2 {
     <nav class="header">
         <a href="/"> <img src="/images/image 4.png" alt="logo.png" style=" width: 200px; margin-left: 50px; "> </a>
         <div>
-        <button type="submit" class="btn btn-lg btn-outline-dark">Register</button>
+        <button type="submit" class="btn btn-lg btn-outline-dark" id="signupbutton">Register</button>
         <button type="submit" class="btn btn-lg btn-dark" id="loginButton">Login</button></div>
     </nav>
 <!-- Layer 1 -->
@@ -482,6 +482,11 @@ we've got you covered. Explore our range of services and book hassle-free with j
         document.getElementById('loginButton').addEventListener('click', function() {
         window.location.href = 'Login.html';
     });
+
+    document.getElementById('signupbutton').addEventListener('click', function() {
+        window.location.href = 'Signup.html';
+    });
+
         // Load footer from footer.html
         $('.footer').load('Login/footer.html');
 
