@@ -405,19 +405,19 @@ we've got you covered. Explore our range of services and book hassle-free with j
             <img class="images" src="images/special service img.png" alt="Special General Service">
             <h3>Special General Service</h3>
             <p>Receive a personalized inspection of your home with a customizable list of urgent repairs and tasks. Choose specific services that fit your needs and budget.</p>
-            <a href="#"><u>Click here to learn more</u></a>
+            <a href="specialgeneralservice.html"><u>Book an appointment.</u></a>
         </div>
         <div class="service-box">
             <img class="images" src="images/servicepackageimg.png" alt="Service Package">
             <h3>Service Package</h3>
             <p>Save more with our exclusive service bundles! Tailor your services to fit your budget and needs, all at discounted rates.</p>
-            <br><a href="#"><u>Click here to learn more</u></a>
+            <br><a href="#"><u>Book an appointment.</u></a>
         </div>
         <div class="service-box">
             <img images="images" src="images/ondemandserviceimg.png" alt="On-Demand Service Booking">
             <h3>On-Demand Service Booking</h3>
             <p>Explore seasonal discounts, promotional deals, and limited-time offers. Get more value with every booking and ensure your home is in perfect shape without breaking the bank.</p>
-            <a href="#"><u>Click here to learn more</u></a>
+            <a href="#"><u>Book an appointment.</u></a>
         </div>
     </div>
 </section>
@@ -478,34 +478,17 @@ we've got you covered. Explore our range of services and book hassle-free with j
     <footer class="footer"></footer>
 
     <script>
-        document.getElementById('loginButton').addEventListener('click', function() {
-        window.location.href = 'Login.html';
-    });
+
+function logout() {
+    // Clear session storage and redirect to login page
+    sessionStorage.removeItem('email');
+    window.location.href = '/Login.html';
+}
+
         // Load footer from footer.html
         $('.footer').load('Login/footer.html');
 
-        function logout() {
-        // Clear user data (if stored in localStorage or sessionStorage)
-        localStorage.removeItem('username'); // Assuming you store username in localStorage
-        localStorage.removeItem('token'); // Remove token if you use it for authentication
-        // You can also clear sessionStorage if needed
-        sessionStorage.clear();
 
-        // Redirect to login or home page
-        window.location.href = '/Login.html'; // Update with your actual login or home page path
-    }
-
-    // Check if user is logged in and display username if available
-    document.addEventListener("DOMContentLoaded", function() {
-        const username = localStorage.getItem('username');
-        if (username) {
-            const header = document.querySelector(".header");
-            const userDisplay = document.createElement("span");
-            userDisplay.textContent = `Welcome, ${username}`;
-            userDisplay.style.marginRight = "10px";
-            header.insertBefore(userDisplay, header.querySelector("button"));
-        }
-    });
 
     let currentReview = 0;
     const reviews = document.querySelectorAll('.review-box');
