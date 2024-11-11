@@ -9,10 +9,27 @@ var GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { google } = require('googleapis');
 
 
-router.get('/home.html', (req, res) => {
+// Middleware to check if user is logged in
+function requireUserLogin(req, res, next) {
   if (req.session && req.session.userId) {
-      res.render('/home.html'); // Render homepage if session exists
+      // If userId exists in session, proceed to the next middleware
+      next();
   } else {
+      // If not authenticated, redirect to login page
+      res.redirect('/Login');
+  }
+}
+
+// Protected route - /home.html
+router.get('/home', requireUserLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', '..', 'public', 'home.html'));
+});
+
+// Protected route - /home.html
+router.get('/speacialGeneralService', requireUserLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', '..', 'public', 'specialgeneralservice.html'));
+});
+
       res.redirect('/Login.html'); // Redirect to login if no session
   }
 });
@@ -289,4 +306,51 @@ router.get('/getVacDetails', (req, res) => {
     res.sendFile(filePath);
 });
 
+// Submit form for special service
+router.post('/submitForm', function(req, res, next) {
+  const {
+    firstName,
+    lastName,
+    email,
+    contact,
+    serviceType,
+    dates,
+    preferedCost,
+    hours,
+    street,
+    suburb,
+    state,
+    country,
+    pin,
+    note
+  } = req.body;
+
+  const sql = `INSERT INTO general_special_service (first_name, last_name, email, contact, service_type, dates, prefered_cost, hours, street, suburb, state, country, pin, note)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  const values = [
+    firstName,
+    lastName,
+    email,
+    contact,
+    serviceType,
+    JSON.stringify(dates), // Store dates as JSON string
+    preferedCost,
+    hours,
+    street,
+    suburb,
+    state,
+    country,
+    pin,
+    note
+  ];
+
+  req.pool.query(sql, values, (err, result) => {
+    if (err) {
+      res.status(500).send({ message: 'Error inserting data', error: err });
+    } else {
+      res.status(200).send({ message: 'Form submitted successfully!' });
+    }
+  });
+});
 module.exports = router;
