@@ -127,6 +127,14 @@
                 <label for="note">Note</label>
                 <textarea id="note" name="note" rows="6" class="form-control" style="resize: both;"></textarea>
             </div>
+
+            <div class="form-group">
+                <input type="checkbox" id="symptoms" name="symptoms" value="No Symptoms">
+                <label for="symptoms">I confirm I have not experienced COVID symptoms in the last 14 days.</label><br>
+                <input type="checkbox" id="consent" name="consent" value="Data Collection Consent Recieved" required>
+                <label for="consent">I agree to the Privacy Policy and consent to my data being used to provide the selected services in a COVID-safe manner.</label><br>
+            </div>
+
             <button type="button" class="btn btn-dark" onclick="submitForm()">Submit</button>
         </form>
     </div>
@@ -197,7 +205,9 @@
                 state: document.getElementById('state').value,
                 country: document.getElementById('country').value,
                 pin: document.getElementById('pin').value,
-                note: document.getElementById('note').value
+                note: document.getElementById('note').value,
+                consent: $('.consent:checked').val(),
+                symptoms: $('.symptoms:checked').val()
             };
 
             fetch('/submitForm', {
