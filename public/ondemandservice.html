@@ -166,45 +166,47 @@
 
     <script>
 
-    function validateForm() {
-            const requiredFields = ['servicetype', 'preferedCost', 'serviceday', 'street', 'suburb', 'state', 'country', 'pin'];
-            let allFilled = true;
+    // function validateForm() {
+    //         const requiredFields = ['servicetype', 'preferedCost', 'serviceday', 'street', 'suburb', 'state', 'country', 'pin'];
+    //         let allFilled = true;
 
-            requiredFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (!element.value.trim()) {
-                    element.classList.add("is-invalid");
-                    allFilled = false;
-                } else {
-                    element.classList.remove("is-invalid");
-                }
-            });
+    //         requiredFields.forEach(field => {
+    //             const element = document.getElementById(field);
+    //             if (!element.value.trim()) {
+    //                 element.classList.add("is-invalid");
+    //                 allFilled = false;
+    //             } else {
+    //                 element.classList.remove("is-invalid");
+    //             }
+    //         });
 
-            if (!allFilled) {
-                alert("Please fill in all required fields.");
-            }
+    //         if (!allFilled) {
+    //             alert("Please fill in all required fields.");
+    //         }
 
-            return allFilled;
-        }
+    //         return allFilled;
+    //     }
 
-//         function validateForm() {
+        function validateForm() {
 
-//     const form = document.getElementById("onDemandForm");
-//     const servicetype = document.getElementById('servicetype').value;
-//     const preferedCost = document.getElementById('preferedCost').value;
-//     const serviceday = form.elements["serviceday"].value;
-//     const street = document.getElementById('street').value;
-//     const suburb = document.getElementById('suburb').value;
-//     const state = document.getElementById('state').value;
-//     const country = document.getElementById('country').value;
-//     const pin = document.getElementById('pin').value;
+    const form = document.getElementById("onDemandForm");
+    const servicetype = document.getElementById('servicetype').value;
+    console.log(servicetype);
+    const preferedCost = document.getElementById('preferedCost').value;
+    const serviceday = form.elements["serviceday"].value;
+    console.log(serviceday);
+    const street = document.getElementById('street').value;
+    const suburb = document.getElementById('suburb').value;
+    const state = document.getElementById('state').value;
+    const country = document.getElementById('country').value;
+    const pin = document.getElementById('pin').value;
 
-//     if (!servicetype| !serviceday| !street| !suburb| !state| !country| !pin| !preferedCost) {
-//         alert("Please fill in all required fields.");
-//         return false;
-//     }
-//     return true;
-// }
+    if (!servicetype| !serviceday| !street| !suburb| !state| !country| !pin| !preferedCost) {
+        alert("Please fill in all required fields.");
+        return false;
+    }
+    return true;
+}
 
 function submitForm() {
     console.log("abc");
@@ -228,6 +230,7 @@ function submitForm() {
         serviceday,
         times,
         preferedCost,
+        servicePerson,
         street,
         suburb,
         state,

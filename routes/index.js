@@ -13,12 +13,12 @@ const { userInfo } = require('os');
 
 // Middleware to check if user is logged in
 function requireUserLogin(req, res, next) {
-  console.log("is"+req.session.userid);
+  console.log("is" + req.session.userid);
   if (req.session.userid) {
-      next();
+    next();
   } else {
-      // If not authenticated, redirect to login page
-      res.redirect('/login');
+    // If not authenticated, redirect to login page
+    res.redirect('/login');
   }
 }
 
@@ -28,8 +28,14 @@ router.get('/home', requireUserLogin, (req, res) => {
 });
 
 //Protected route - On Demand Service form
-router.get('/onDemandService',requireUserLogin, function(req, res, next) {
+router.get('/onDemandService', requireUserLogin, function (req, res, next) {
   var filePath = path.join(__dirname, '..', 'public', 'ondemandservice.html');
+  res.sendFile(filePath);
+});
+
+//Protected route - Service Package Form
+router.get('/package', requireUserLogin, function (req, res, next) {
+  var filePath = path.join(__dirname, '..', 'public', 'servicepackage.html');
   res.sendFile(filePath);
 });
 
@@ -39,28 +45,26 @@ router.get('/getVacDetails', (req, res) => {
   res.sendFile(filePath);
 });
 
-// Protected route - /home.html
-router.get('/speacialGeneralService', requireUserLogin, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', '..', 'public', 'specialgeneralservice.html'));
+// Protected route - Special General Service Form
+router.get('/specialGeneralService', requireUserLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'specialgeneralservice.html'));
 });
 
-
-
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/list', function(req, res, next) {
-  req.pool.getConnection(function(err, connection) {
-    if(err){
+router.get('/list', function (req, res, next) {
+  req.pool.getConnection(function (err, connection) {
+    if (err) {
       res.sendStatus(500);
       return;
     }
     var query = 'select * from users;';
-    connection.query(query, function(er, rows, fields){
+    connection.query(query, function (er, rows, fields) {
       connection.release();
-      if(er){
+      if (er) {
         res.sendStatus(500);
         return;
       }
@@ -70,25 +74,25 @@ router.get('/list', function(req, res, next) {
 });
 
 
-router.get('/login', function(req, res, next) {
+router.get('/login', function (req, res, next) {
   var filePath = path.join(__dirname, '..', 'public', 'Login.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
-router.get('/signup', function(req, res, next) {
+router.get('/signup', function (req, res, next) {
   var filePath = path.join(__dirname, '..', 'public', 'Signup.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
 // POST login
-router.post('/Login', function(req, res, next) {
+router.post('/Login', function (req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
 
   if (username && password) {
     // Use parameterized queries to avoid SQL injection
     var query = 'SELECT * FROM users WHERE email = ?';
-    req.pool.query(query, [username], function(error, data) {
+    req.pool.query(query, [username], function (error, data) {
       if (error) {
         console.error('Database query error:', error);
         return res.json({ success: false, errorMessage: 'Database error. Please try again later.' });
@@ -120,7 +124,7 @@ router.post('/registerUser', (req, res) => {
   const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = req.body;
 
   req.pool.getConnection((err, connection) => {
-    if(err) {
+    if (err) {
       console.log(err);
       res.sendStatus(500);
       return;
@@ -129,7 +133,7 @@ router.post('/registerUser', (req, res) => {
     // Insert the new user
     const sql = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
     connection.query(sql, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (err, results) => {
-      if(err) {
+      if (err) {
         console.log(err);
         connection.release();
         res.status(500).json({ success: false, message: 'Database insertion error' });
@@ -139,7 +143,7 @@ router.post('/registerUser', (req, res) => {
       const user_id = results.insertId;
       req.session.user_id = user_id;
       connection.release();
-      res.status(200).json({ success: true, user_id:req.session.user_id, message: 'User registered successfully!' });
+      res.status(200).json({ success: true, user_id: req.session.user_id, message: 'User registered successfully!' });
     });
   });
 });
@@ -149,57 +153,57 @@ const GOOGLE_CLIENT_ID = '877734274250-5ck044eq6fjdahku4hb87rsstikr0n6h.apps.goo
 const GOOGLE_CLIENT_SECRET = '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';
 
 passport.use(new GoogleStrategy({
-    clientID: GOOGLE_CLIENT_ID,
-    clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:8080/auth/google/callback",
-    scope: ['profile',
-      'email',
-      'https://www.googleapis.com/auth/user.birthday.read',
-      'https://www.googleapis.com/auth/user.gender.read',
-      'https://www.googleapis.com/auth/user.phonenumbers.read']
-  },
-    function (accessToken, refreshToken, profile, done) {
-      // Initialize OAuth2 client with the access token
-      const oauth2Client = new google.auth.OAuth2();
-      oauth2Client.setCredentials({ access_token: accessToken });
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: "http://localhost:8080/auth/google/callback",
+  scope: ['profile',
+    'email',
+    'https://www.googleapis.com/auth/user.birthday.read',
+    'https://www.googleapis.com/auth/user.gender.read',
+    'https://www.googleapis.com/auth/user.phonenumbers.read']
+},
+  function (accessToken, refreshToken, profile, done) {
+    // Initialize OAuth2 client with the access token
+    const oauth2Client = new google.auth.OAuth2();
+    oauth2Client.setCredentials({ access_token: accessToken });
 
-      // Google People API
-      const service = google.people({ version: 'v1', auth: oauth2Client });
+    // Google People API
+    const service = google.people({ version: 'v1', auth: oauth2Client });
 
-      // Fetch user details from Google People API
-      service.people.get({
-        resourceName: 'people/me',
-        personFields: 'birthdays,genders,addresses,phoneNumbers',
-      }, (err, response) => {
-        if (err) {
-          console.error('Error fetching user details:', err);
-          return done(err);
-        }
+    // Fetch user details from Google People API
+    service.people.get({
+      resourceName: 'people/me',
+      personFields: 'birthdays,genders,addresses,phoneNumbers',
+    }, (err, response) => {
+      if (err) {
+        console.error('Error fetching user details:', err);
+        return done(err);
+      }
 
-        var user = {};
+      var user = {};
 
-        // Extract additional user details if available
-        if (response && response.data) {
-          const data = response.data;
-          user.first_name = profile.name.familyName && profile.name.familyName.length > 0 ? profile.name.givenName : null;
-          user.last_name = profile.name.familyName && profile.name.familyName.length > 0 ? profile.name.familyName : null,
-            user.email = profile.emails[0].value,
-            user.dob = data.birthdays && data.birthdays.length > 0 && data.birthdays[0].date.year && data.birthdays[0].date.month && data.birthdays[0].date.day && data.birthdays[0].date.year > 0 && data.birthdays[0].date.month > 0 && data.birthdays[0].date.day > 0 ? data.birthdays[0].date.year + '-' + data.birthdays[0].date.month + '-' + data.birthdays[0].date.day : null;
-          user.gender = data.genders && data.genders.length > 0 ? data.genders[0].value : null;
-          //user.address = data.addresses && data.addresses.length > 0 ? data.addresses[0].formattedValue : null;
-          user.phoneNumber = data.phoneNumbers && data.phoneNumbers.length > 0 ? data.phoneNumbers[0].value.replace(/ /g, '') : null;
-        }
-        return done(null, user);
-      });
-    }
-  ));
+      // Extract additional user details if available
+      if (response && response.data) {
+        const data = response.data;
+        user.first_name = profile.name.familyName && profile.name.familyName.length > 0 ? profile.name.givenName : null;
+        user.last_name = profile.name.familyName && profile.name.familyName.length > 0 ? profile.name.familyName : null,
+          user.email = profile.emails[0].value,
+          user.dob = data.birthdays && data.birthdays.length > 0 && data.birthdays[0].date.year && data.birthdays[0].date.month && data.birthdays[0].date.day && data.birthdays[0].date.year > 0 && data.birthdays[0].date.month > 0 && data.birthdays[0].date.day > 0 ? data.birthdays[0].date.year + '-' + data.birthdays[0].date.month + '-' + data.birthdays[0].date.day : null;
+        user.gender = data.genders && data.genders.length > 0 ? data.genders[0].value : null;
+        //user.address = data.addresses && data.addresses.length > 0 ? data.addresses[0].formattedValue : null;
+        user.phoneNumber = data.phoneNumbers && data.phoneNumbers.length > 0 ? data.phoneNumbers[0].value.replace(/ /g, '') : null;
+      }
+      return done(null, user);
+    });
+  }
+));
 
-  passport.serializeUser((user, done) => done(null, user));
-  passport.deserializeUser((obj, done) => done(null, obj));
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((obj, done) => done(null, obj));
 
-  router.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-  });
+router.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
 
 router.get('/auth/google',
   passport.authenticate('google', {
@@ -213,7 +217,7 @@ router.get('/auth/google',
 
 router.get('/auth/google/login',
   passport.authenticate('google', {
-    scope: ['profile','email']  //Only getting required fields for security (login)
+    scope: ['profile', 'email']  //Only getting required fields for security (login)
   })
 );
 
@@ -243,7 +247,7 @@ router.get('/auth/failure', function (req, res) {
 router.post('/registerUserGOauth', (req, res) => {
   const { first_name, last_name, dob, country, language, mobile, email, vaccinated } = req.body;
 
-  req.pool.getConnection(function(err, connection) {
+  req.pool.getConnection(function (err, connection) {
     if (err) {
       res.sendStatus(500);
       return;
@@ -251,7 +255,7 @@ router.post('/registerUserGOauth', (req, res) => {
 
     // Check if user already exists
     const checkUserQuery = 'SELECT * FROM users WHERE email = ?';
-    connection.query(checkUserQuery, [email], function(error, data) {
+    connection.query(checkUserQuery, [email], function (error, data) {
       if (error) {
         connection.release();
         res.status(500).json({ success: false, message: 'Database query error' });
@@ -262,65 +266,65 @@ router.post('/registerUserGOauth', (req, res) => {
         connection.release();
         res.status(200).json({ success: false, check: true, message: 'User already exists! Please login' });
       } else {
-          // Insert the new user
-          const password = generatePassword(12); // Set length as per OWASP 8 - minimum, 12 - improved security
-          console.log(password);
+        // Insert the new user
+        const password = generatePassword(12); // Set length as per OWASP 8 - minimum, 12 - improved security
+        console.log(password);
 
-          const insertUserQuery = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-          connection.query(insertUserQuery, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (insertError) => {
-            if (insertError) {
-              connection.release();
-              console.log(insertError);
-              res.status(500).json({ success: false, message: 'Database insertion error' });
+        const insertUserQuery = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        connection.query(insertUserQuery, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (insertError) => {
+          if (insertError) {
+            connection.release();
+            console.log(insertError);
+            res.status(500).json({ success: false, message: 'Database insertion error' });
+            return;
+          }
+
+          // Retrieve the newly inserted user's ID and store it in session
+          connection.query(checkUserQuery, [email], function (selectError, newData) {
+            connection.release();
+            if (selectError) {
+              res.status(500).json({ success: false, message: 'Database query error' });
               return;
             }
 
-            // Retrieve the newly inserted user's ID and store it in session
-            connection.query(checkUserQuery, [email], function(selectError, newData) {
-              connection.release();
-              if (selectError) {
-                res.status(500).json({ success: false, message: 'Database query error' });
-                return;
-              }
-
-              if (newData.length > 0) {
-                req.session.userid = newData[0].id;
-                res.status(200).json({ success: true, id:req.session.userid, message: 'User registered successfully!' });
-              } else {
-                res.json({ success: false, message: 'Registration error. Please try authentication again!' });
-              }
-            });
+            if (newData.length > 0) {
+              req.session.userid = newData[0].id;
+              res.status(200).json({ success: true, id: req.session.userid, message: 'User registered successfully!' });
+            } else {
+              res.json({ success: false, message: 'Registration error. Please try authentication again!' });
+            }
           });
-        }
-      });
+        });
+      }
     });
+  });
 });
 
 // OAuth Login
-router.post('/userLoginGOAuth', function(req, res, next) {
+router.post('/userLoginGOAuth', function (req, res, next) {
 
   console.log("abc");
   var username = req.body.user.email;
-  console.log("user"+username);
+  console.log("user" + username);
 
   if (username) {
-      var query = `SELECT * FROM users WHERE email = "${username}"`;
-      req.pool.query(query,function(error, data){
-          if (error) {
-              console.log(error);
-              res.sendStatus(500);
-              return;
-            }
+    var query = `SELECT * FROM users WHERE email = "${username}"`;
+    req.pool.query(query, function (error, data) {
+      if (error) {
+        console.log(error);
+        res.sendStatus(500);
+        return;
+      }
 
-          if(data.length>0){
-              req.session.userid = data[0].id;
-              res.json({ success: true, user_id: req.session.userid });
-          }else{
-              res.json({ success: false, check: true, message: 'Please sign in before login!' });
-          }
-      });
+      if (data.length > 0) {
+        req.session.userid = data[0].id;
+        res.json({ success: true, user_id: req.session.userid });
+      } else {
+        res.json({ success: false, check: true, message: 'Please sign in before login!' });
+      }
+    });
   } else {
-      res.json({ success: false, message: 'Invalid username!' });
+    res.json({ success: false, message: 'Invalid username!' });
   }
 });
 
@@ -330,7 +334,7 @@ router.get('/getVacDetails', (req, res) => {
   res.sendFile(filePath);
 });
 
-router.post('/submitForm', function(req, res, next) {
+router.post('/submitForm', function (req, res, next) {
   const {
     firstName,
     lastName,
@@ -378,6 +382,31 @@ router.post('/submitForm', function(req, res, next) {
       console.error(err);
       res.status(500).send({ message: 'Error inserting data', error: err });
     } else {
+
+      const esql = "SELECT email FROM users WHERE id = ?"
+      const user_id = req.session.userid;
+
+      req.pool.query(esql, user_id, (err, result) => {
+        console.log(result);
+        if (err) {
+          console.log(err);
+          res.status(500).send({ message: 'Error fetching email!', error: err });
+        } else {
+          const recipientEmails = result.map(u => u.email);
+          const subject = `[HomeCarePro] - Booking Recieved: ${servicetype}`;
+          const message = `
+          Hi,
+
+          We have successfully recieved your booking! Please review the details below:
+
+          ${servicetype}
+          Date: ${date}
+          Duration: ${hours}
+          `;
+          sendEmailNotification(recipientEmails, subject, message);
+        }
+      });
+
       res.status(200).send({ message: 'Form submitted successfully!' });
     }
   });
@@ -420,12 +449,12 @@ function hashPassword(password) {
 }
 
 // Submit form for ondemand service
-router.post('/submitOnDemand', function(req, res, next) {
+router.post('/submitOnDemand', function (req, res, next) {
   const {
-    serviceType,
-    serviceDay,
+    servicetype,
+    serviceday,
     times,
-    preferedCost = 0,
+    preferedCost,
     servicePerson,
     street,
     suburb,
@@ -436,7 +465,7 @@ router.post('/submitOnDemand', function(req, res, next) {
   } = req.body;
 
   const user_id = req.session.userid;
-  console.log(user_id);
+  console.log(servicetype);
 
 
   const sql = `INSERT INTO on_demand_service (user_id, servicetype, serviceday, timeslot, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
@@ -444,8 +473,8 @@ router.post('/submitOnDemand', function(req, res, next) {
 
   const values = [
     user_id,
-    serviceType,
-    serviceDay,
+    servicetype,
+    serviceday,
     JSON.stringify(times),
     preferedCost,
     servicePerson,
@@ -463,11 +492,153 @@ router.post('/submitOnDemand', function(req, res, next) {
       console.log(err);
       res.status(500).send({ message: 'Error inserting data', error: err });
     } else {
-      res.status(200).send({ message: 'Form submitted successfully!' });
+      const esql = "SELECT email FROM users WHERE id = ?"
+
+      req.pool.query(esql, user_id, (err, result) => {
+        let serviceDate = '';
+        const date = new Date();
+        let day = date.getDate();
+        if (serviceday === 'same') {
+          serviceDate = day + '-' + date.getMonth() + '-' + date.getFullYear();
+        } else {
+          day += 1;
+          serviceDate = day + '-' + date.getMonth() + '-' + date.getFullYear();
+        }
+        console.log(result);
+        if (err) {
+          console.log(err);
+          res.status(500).send({ message: 'Error fetching email!', error: err });
+        } else {
+          const recipientEmails = result.map(u => u.email);
+          const subject = `[HomeCarePro] - Booking Recieved: ${servicetype}`;
+          const message = `
+          Hi,
+
+          We have successfully recieved your booking! Please review the details below:
+
+          ${servicetype}
+          Date: ${serviceDate}
+          Time: ${times}
+          Preference: ${servicePerson}
+
+          We will try and send a service person that is of your preference but please be informed that itis not always possible to satisfy that condition.`;
+          sendEmailNotification(recipientEmails, subject, message);
+        }
+      });
+
+      res.status(200).send({ message: 'Form submitted successfully! Please check your email for details.' });
     }
   });
 });
 
+// Ethereal Email setup
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  port: 587,
+  auth: {
+    user: 'joel.olson@ethereal.email',
+    pass: 'EJKT4jyV14nyrRRzWA'
+  }
+});
 
+// Function to send emails
+function sendEmailNotification(recipients, subject, message) {
+  const mailOptions = {
+    from: 'notification@homecarepro.com',
+    to: recipients,
+    subject: subject,
+    text: message,
+    html: `<p>${message}</p>`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+      return;
+    }
+    console.log('Message sent: %s', info.messageId);
+    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+  });
+}
+
+// Submit form for packages
+router.post('/submitPackage', function (req, res, next) {
+  const {
+    package,
+    servicePerson,
+    date,
+    time,
+    additionalServices,
+    safetyPreferences,
+    street,
+    suburb,
+    state,
+    country,
+    pin,
+    note,
+    consent,
+    symptoms
+  } = req.body;
+
+  const user_id = req.session.userid;
+
+  const sql = `INSERT INTO package_service(user_id, package, servicePerson, date, time, additionalServices, safetyPreferences, street, suburb, state, country, pin, note, consent, symptoms)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  const values = [
+    user_id,
+    package,
+    servicePerson,
+    date,
+    time,
+    additionalServices,
+    safetyPreferences,
+    street,
+    suburb,
+    state,
+    country,
+    pin,
+    note,
+    consent,
+    symptoms
+  ];
+
+  req.pool.query(sql, values, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({ message: 'Error inserting data', error: err });
+    } else {
+
+      const esql = "SELECT email FROM users WHERE id = ?"
+      const user_id = req.session.userid;
+
+      req.pool.query(esql, user_id, (err, result) => {
+        console.log(result);
+        if (err) {
+          console.log(err);
+          res.status(500).send({ message: 'Error fetching email!', error: err });
+        } else {
+          const recipientEmails = result.map(u => u.email);
+          const subject = `[HomeCarePro] - Booking Recieved: ${package} Package`;
+          const message = `
+          Hi,
+
+          We have successfully recieved your booking! Please review the details below:
+
+          ${package}
+          Date: ${date}
+          Time: ${time}
+          Service Person Preference: ${servicePerson}
+
+          We will try and send a service person that is of your preference but please be informed that itis not always possible to satisfy that condition.
+          `;
+          sendEmailNotification(recipientEmails, subject, message);
+        }
+      });
+
+      res.status(200).send({ message: 'Form submitted successfully!' });
+    }
+  });
+});
 
 module.exports = router;
