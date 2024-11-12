@@ -497,17 +497,110 @@ function hashPassword(password) {
 //   });
 // });
 
+// // Submit form for ondemand service
+// router.post('/submitOnDemand', function (req, res, next) {
+//   const {
+//     serviceType,
+//     email,
+//     date,
+
+//     serviceday,
+//     times,
+//     preferedCost,
+
+//     servicePerson,
+//     street,
+//     suburb,
+//     state,
+//     country,
+//     pin,
+//     note
+//   } = req.body;
+
+//   const user_id = req.session.userid;
+//   console.log(servicetype);
+
+//   // If times is an array, we can store it as a JSON string in the database
+//   const timesFormatted = JSON.stringify(times);
+
+//   const sql = `INSERT INTO on_demand_service (servicetype,email, date, times, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
+//               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+//   const values = [
+//     serviceType,
+//     email,
+//     date,
+//     timesFormatted, // Save times as a JSON string
+//     preferedCost || 0, // Default to 0 if not provided
+//     user_id,
+
+//     serviceday,
+//     JSON.stringify(times),
+//     preferedCost,
+//     servicePerson,
+//     street,
+//     suburb,
+//     state,
+//     country,
+//     pin,
+//     note
+//   ];
+
+//   req.pool.query(sql, values, (err, result) => {
+//     if (err) {
+//       console.error('Error inserting data:', err);
+//       res.status(500).send({ message: 'Error inserting data into the database.', error: err });
+//     } else {
+//       console.log('Data inserted successfully:', result);
+//       const esql = "SELECT email FROM users WHERE id = ?"
+
+//       req.pool.query(esql, user_id, (err, result) => {
+//         // let serviceDate = '';
+//         // const date = new Date();
+//         // let day = date.getDate();
+//         // if (serviceday === 'same') {
+//         //   serviceDate = day + '-' + date.getMonth() + '-' + date.getFullYear();
+//         // } else {
+//         //   day += 1;
+//         //   serviceDate = day + '-' + date.getMonth() + '-' + date.getFullYear();
+//         // }
+//         console.log(result);
+//         if (err) {
+//           console.log(err);
+//           res.status(500).send({ message: 'Error fetching email!', error: err });
+//         } else {
+//           const recipientEmails = result.map(u => u.email);
+//           const subject = `[HomeCarePro] - Booking Recieved: ${servicetype}`;
+//           const message = `
+//           Hi,
+
+//           We have successfully recieved your booking! Please review the details below:
+
+//           ${servicetype}
+//           Date: ${date}
+//           Time: ${times}
+//           Preference: ${servicePerson}
+
+//           We will try and send a service person that is of your preference but please be informed that itis not always possible to satisfy that condition.`;
+//           sendEmailNotification(recipientEmails, subject, message);
+//         }
+//       });
+
+//       res.status(200).send({ message: 'Form submitted successfully! Please check your email for details.' });
+//     }
+//   });
+// });
+
+
 // Submit form for ondemand service
 router.post('/submitOnDemand', function (req, res, next) {
   const {
     serviceType,
     email,
     date,
-
     serviceday,
     times,
     preferedCost,
-
     servicePerson,
     street,
     suburb,
@@ -518,13 +611,14 @@ router.post('/submitOnDemand', function (req, res, next) {
   } = req.body;
 
   const user_id = req.session.userid;
-  console.log(servicetype);
+  console.log("Service Type:", serviceType);
 
-  // If times is an array, we can store it as a JSON string in the database
+  // Convert `times` to JSON if it’s an array
   const timesFormatted = JSON.stringify(times);
 
-  const sql = `INSERT INTO on_demand_service (servicetype,email, date, times, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const sql = `INSERT INTO on_demand_service
+                (servicetype, email, date, times, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [
     serviceType,
@@ -532,11 +626,6 @@ router.post('/submitOnDemand', function (req, res, next) {
     date,
     timesFormatted, // Save times as a JSON string
     preferedCost || 0, // Default to 0 if not provided
-    user_id,
-
-    serviceday,
-    JSON.stringify(times),
-    preferedCost,
     servicePerson,
     street,
     suburb,
@@ -552,41 +641,31 @@ router.post('/submitOnDemand', function (req, res, next) {
       res.status(500).send({ message: 'Error inserting data into the database.', error: err });
     } else {
       console.log('Data inserted successfully:', result);
-      const esql = "SELECT email FROM users WHERE id = ?"
 
-      req.pool.query(esql, user_id, (err, result) => {
-        let serviceDate = '';
-        const date = new Date();
-        let day = date.getDate();
-        if (serviceday === 'same') {
-          serviceDate = day + '-' + date.getMonth() + '-' + date.getFullYear();
-        } else {
-          day += 1;
-          serviceDate = day + '-' + date.getMonth() + '-' + date.getFullYear();
-        }
-        console.log(result);
+      const esql = "SELECT email FROM users WHERE id = ?";
+      req.pool.query(esql, [user_id], (err, result) => {
         if (err) {
           console.log(err);
           res.status(500).send({ message: 'Error fetching email!', error: err });
         } else {
           const recipientEmails = result.map(u => u.email);
-          const subject = `[HomeCarePro] - Booking Recieved: ${servicetype}`;
+          const subject = `[HomeCarePro] - Booking Received: ${serviceType}`;
           const message = `
           Hi,
 
-          We have successfully recieved your booking! Please review the details below:
+          We have successfully received your booking! Please review the details below:
 
-          ${servicetype}
-          Date: ${serviceDate}
-          Time: ${times}
+          Service Type: ${serviceType}
+          Date: ${date}
+          Time: ${timesFormatted}
           Preference: ${servicePerson}
 
-          We will try and send a service person that is of your preference but please be informed that itis not always possible to satisfy that condition.`;
+          We will try and send a service person of your preference, but please be informed that it is not always possible to meet this preference.`;
+
           sendEmailNotification(recipientEmails, subject, message);
+          res.status(200).send({ message: 'Form submitted successfully! Please check your email for details.' });
         }
       });
-
-      res.status(200).send({ message: 'Form submitted successfully! Please check your email for details.' });
     }
   });
 });
