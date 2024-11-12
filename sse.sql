@@ -24,27 +24,6 @@ INSERT INTO users (first_name, last_name, dob, country, language, mobile, email,
 ('Tanveer', 'Akram', '1999-03-30', 'India', 'Hindi', '0491758493', 'tanveer@gmail.com', 'password293', 'no'),
 ('Sharlene', 'Rodrigues', '2000-04-18', 'India', 'Konkani', '0496811930', 'sharlene@gmail.com', 'password323', 'yes');
 
-
--- INSERT INTO users (email, password ) VALUES
--- ('ashwini@gmail.com', 'password123'),
--- ('tanveer@gmail.com', 'password456'),
--- ('sharlene@gmail.com', 'password789'),
--- ('tung@gmail.com', 'password321'),
--- ('emmanuel@gmail.com', 'password234'),
--- ('punlapa@gmail.com', '12345678'),
--- ('Leah@gmail.com', '123456'),
--- -- ('vishal@gmail.com', 'password323');
--- INSERT INTO users (email, password ) VALUES
--- ('ashwini@gmail.com', 'password123'),
--- ('tanveer@gmail.com', 'password456'),
--- ('sharlene@gmail.com', 'password789'),
--- ('tung@gmail.com', 'password321'),
--- ('emmanuel@gmail.com', 'password234'),
--- ('punlapa@gmail.com', '12345678'),
--- ('Leah@gmail.com', '123456'),
--- ('vishal@gmail.com', 'password323');
-
-
 CREATE TABLE general_special_service (
     id INT AUTO_INCREMENT PRIMARY KEY,
     firstName VARCHAR(100),
@@ -52,7 +31,7 @@ CREATE TABLE general_special_service (
     email VARCHAR(100),
     contact VARCHAR(20),
     servicetype VARCHAR(50),
-    date VARCHAR(200),
+    dates VARCHAR(200),
     preferedCost DECIMAL(10, 2),
     hours INT,
     street VARCHAR(255),
@@ -62,4 +41,23 @@ CREATE TABLE general_special_service (
     pin VARCHAR(20),
     note VARCHAR(200),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE on_demand_service (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    servicetype VARCHAR(50),
+    serviceday VARCHAR(50),
+    timeslot VARCHAR(200),
+    preferedCost DECIMAL(10, 2),
+    serviceperson VARCHAR(7),
+    hours INT,
+    street VARCHAR(255),
+    suburb VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    pin VARCHAR(20),
+    issue_desc VARCHAR(200),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id)
 );

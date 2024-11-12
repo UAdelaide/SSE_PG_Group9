@@ -59,7 +59,7 @@
 </head>
 <body>
     <nav class="header">
-        <a href="/"> <img src="/images/image 4.png" alt="logo.png" class="nav-link-img" style="width: 200px; margin-left: 50px;"> </a>
+        <a href="/home"> <img src="/images/image 4.png" alt="logo.png" class="nav-link-img" style="width: 200px; margin-left: 50px;"> </a>
         <div>
             <button type="button" class="btn btn-dark btn-sm" onclick="logout()">Logout</button>
         </div>
@@ -134,7 +134,7 @@
     <footer class="footer"></footer>
 
      <!-- Modal for successful submission -->
-     <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -160,7 +160,7 @@
           $('.footer').load('Login/footer.html');
 
           function validateForm() {
-            const requiredFields = ['firstName', 'lastName', 'email', 'contact', 'servicetype', 'date'];
+            const requiredFields = ['firstName', 'lastName', 'email', 'contact', 'servicetype', 'date', 'preferedCost', 'hours'];
             let allFilled = true;
 
             requiredFields.forEach(field => {
@@ -258,6 +258,8 @@
             })
             .catch(error => console.error('Error submitting form:', error));
         }
+
+
         function logout() {
             sessionStorage.removeItem('email');
             window.location.href = '/Login.html';

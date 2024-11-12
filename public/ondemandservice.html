@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On Demand Service</title>
+
+    <style>
+        .header {
+            font-size: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #FBFAF9;
+            padding: 1rem 5%;
+        }
+        footer {
+            bottom: 0;
+            left: 0;
+            height: 200px;
+            width: 100%;
+            background-color: #f4f4f4;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
+        }
+        html, body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        main {
+            flex: 1;
+        }
+        .container {
+            margin-top: 20px;
+            width: fit-content;
+            margin-left: 200px;
+            width: 530px;
+        }
+        .btn-update {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .selected-dates {
+            margin-bottom: 20px;
+        }
+        .mandatory {
+            color: red;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="header">
+        <a href="/"> <img src="/images/image 4.png" alt="logo.png" class="nav-link-img" style="width: 200px; margin-left: 50px;"> </a>
+        <div>
+            <button type="button" class="btn btn-dark btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div style="margin-bottom: 1rem;"></div>
+    <div class="name-header" style="margin-left:200px; font-weight: bold;">On-Demand Service</div>
+
+    <div class="container">
+        <div id="successMessage" style="color: green;"></div>
+
+        <form id="onDemandForm">
+            <div class="form-group">
+                <label for="type-of-service">Type of Service<span class="mandatory">*</span></label>
+                <select id="servicetype" name="servicetype" class="form-control">
+                    <option value="house inspection">House Inspection</option>
+                    <option value="painting">Painting</option>
+                    <option value="plumbing">Plumbing</option>
+                    <option value="cleaning">Cleaning</option>
+                    <option value="pest control">Pest Control</option>
+                    <option value="electrical">Electrical</option>
+                    <option value="carpentry">Carpentry</option>
+                    <option value="heatingCooling">Heating & Cooling</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="serviceday">Day of Service<span class="mandatory">*</span></label><br>
+                <input type="radio" id="html" name="serviceday" value="same">
+                <label for="same">Same Day</label><br>
+                <input type="radio" id="css" name="serviceday" value="next">
+                <label for="next">Next Day</label><br>
+            </div>
+
+            <div class="form-group">
+                <label for="times[]">Time Slot</label>
+                <div id="time-container">
+                    <input type="time" class="form-control mt-2" name="times[]" onchange="updateSelectedTimes()">
+                </div>
+                <button type="button" class="btn btn-secondary mt-2" onclick="addTimeField()">Add Another Slot</button>
+            </div>
+            <div id="selected-times-container" class="selected-times">
+                <!-- Selected dates will appear here -->
+            </div>
+
+            <div class="form-group">
+                <label for="preferedCost">Preferred Cost of Service<span class="mandatory">*</span></label>
+                <input type="number" class="form-control" id="preferedCost">
+            </div>
+
+            <div class="form-group">
+                <label for="servicePerson">Any preference of Service Person</label><br>
+                <input type="radio" id="male" name="servicePerson" value="male">
+                <label for="male">Male</label><br>
+                <input type="radio" id="female" name="servicePerson" value="female">
+                <label for="female">Female</label><br>
+                <input type="radio" id="any" name="servicePerson" value="any">
+                <label for="any">No Preference</label>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address<span class="mandatory">*</span></label>
+                <input type="text" class="form-control" id="street" placeholder="Street">
+                <input type="text" class="form-control mt-2" id="suburb" placeholder="Suburb">
+                <input type="text" class="form-control mt-2" id="state" placeholder="State">
+                <input type="text" class="form-control mt-2" id="country" placeholder="Country">
+                <input type="text" class="form-control mt-2" id="pin" placeholder="Pin Code">
+            </div>
+            <div class="form-group">
+                <label for="issue">Issue Description or Additional Notes</label>
+                <textarea id="issue" name="issue" rows="6" class="form-control" style="resize: both;"></textarea>
+            </div>
+            <button type="button" class="btn btn-dark" onclick="submitForm()">Submit</button>
+        </form>
+    </div>
+
+    <footer class="footer"></footer>
+    <!-- Modal for successful submission -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Submission Successful</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <img images="images" src="images/success image.jpg" alt="green tick image">
+                <div class="modal-body">
+
+                    Your service booking request has been submitted successfully!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+    function validateForm() {
+            const requiredFields = ['servicetype', 'preferedCost', 'serviceday', 'street', 'suburb', 'state', 'country', 'pin'];
+            let allFilled = true;
+
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (!element.value.trim()) {
+                    element.classList.add("is-invalid");
+                    allFilled = false;
+                } else {
+                    element.classList.remove("is-invalid");
+                }
+            });
+
+            if (!allFilled) {
+                alert("Please fill in all required fields.");
+            }
+
+            return allFilled;
+        }
+
+//         function validateForm() {
+
+//     const form = document.getElementById("onDemandForm");
+//     const servicetype = document.getElementById('servicetype').value;
+//     const preferedCost = document.getElementById('preferedCost').value;
+//     const serviceday = form.elements["serviceday"].value;
+//     const street = document.getElementById('street').value;
+//     const suburb = document.getElementById('suburb').value;
+//     const state = document.getElementById('state').value;
+//     const country = document.getElementById('country').value;
+//     const pin = document.getElementById('pin').value;
+
+//     if (!servicetype| !serviceday| !street| !suburb| !state| !country| !pin| !preferedCost) {
+//         alert("Please fill in all required fields.");
+//         return false;
+//     }
+//     return true;
+// }
+
+function submitForm() {
+    console.log("abc");
+    if (!validateForm()) return;
+
+    const form = document.getElementById("onDemandForm");
+    const servicetype = document.getElementById('servicetype').value;
+    const serviceday = form.elements["serviceday"].value;
+    const times = Array.from(document.querySelectorAll("input[name='times[]']")).map(input => input.value);
+    const preferedCost = document.getElementById('preferedCost').value;
+    const servicePerson = form.elements['servicePerson'].value;
+    const street = document.getElementById('street').value;
+    const suburb = document.getElementById('suburb').value;
+    const state = document.getElementById('state').value;
+    const country = document.getElementById('country').value;
+    const pin = document.getElementById('pin').value;
+    const note = document.getElementById('issue').value;
+
+    const formData = {
+        servicetype,
+        serviceday,
+        times,
+        preferedCost,
+        street,
+        suburb,
+        state,
+        country,
+        pin,
+        note
+    };
+
+    fetch('/submitOnDemand', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Form submitted successfully!') {
+            // Show the success modal
+            $('#successModal').modal('show');
+        } else {
+            alert('Error submitting form: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error submitting form.');
+    });
+}
+
+        function logout() {
+            sessionStorage.removeItem('email');
+            window.location.href = '/Login.html';
+        }
+
+        let timeFieldCount = 1;
+        const maxTimes = 3; // Limit to 3 date fields
+
+        function addTimeField() {
+            if (timeFieldCount >= maxTimes) {
+                alert("You can only add up to 3 time slots.");
+                return;
+            }
+            timeFieldCount++;
+
+            const container = document.getElementById("time-container");
+            const timeFieldWrapper = document.createElement("div");
+            timeFieldWrapper.classList.add("input-group", "mt-2", "time-field");
+
+            const newTimeField = document.createElement("input");
+            newTimeField.type = "time";
+            newTimeField.classList.add("form-control");
+            newTimeField.name = "times[]";
+            newTimeField.onchange = updateSelectedTimes;
+
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.classList.add("btn", "btn-danger");
+            removeButton.textContent = "Remove";
+            removeButton.onclick = function() {
+                removeTimeField(removeButton);
+            };
+
+            const inputGroupAppend = document.createElement("div");
+            inputGroupAppend.classList.add("input-group-append");
+            inputGroupAppend.appendChild(removeButton);
+
+            timeFieldWrapper.appendChild(newTimeField);
+            timeFieldWrapper.appendChild(inputGroupAppend);
+            container.appendChild(timeFieldWrapper);
+
+            updateSelectedTimes();
+        }
+
+        function removeTimeField(button) {
+            const timeFieldWrapper = button.parentElement.parentElement;
+            timeFieldWrapper.remove();
+            timeFieldCount--;
+            updateSelectedTimes();
+        }
+
+        function updateSelectedTimes() {
+            const times = document.querySelectorAll("input[name='times[]']");
+            const selectedTimesContainer = document.getElementById("selected-times-container");
+            selectedTimesContainer.innerHTML = ""; // Clear previous dates
+
+            times.forEach(timeField => {
+                if (timeField.value) {
+                    const timeItem = document.createElement("p");
+                    timeItem.textContent = `Selected Time: ${timeField.value}`;
+                    selectedTimesContainer.appendChild(timeItem);
+                }
+            });
+        }
+
+        window.onload = function() {
+            // Initialize the selected dates display
+            updateSelectedTimes();
+        };
+    </script>
+</body>
+</html>
