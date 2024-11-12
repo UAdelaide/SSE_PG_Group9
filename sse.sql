@@ -61,3 +61,24 @@ CREATE TABLE on_demand_service (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
+
+CREATE TABLE package_service (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    package VARCHAR(50),
+    servicePerson VARCHAR(50),
+    date date,
+    time VARCHAR(200),
+    additionalServices VARCHAR(250),
+    safetyPreferences VARCHAR(250),
+    street VARCHAR(255),
+    suburb VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    pin VARCHAR(20),
+    note VARCHAR(200),
+    consent VARCHAR(200),
+    symptoms VARCHAR(200),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);

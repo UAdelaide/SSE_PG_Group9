@@ -33,15 +33,21 @@ router.get('/onDemandService', requireUserLogin, function (req, res, next) {
   res.sendFile(filePath);
 });
 
+//Protected route - Service Package Form
+router.get('/package', requireUserLogin, function (req, res, next) {
+  var filePath = path.join(__dirname, '..', 'public', 'servicepackage.html');
+  res.sendFile(filePath);
+});
+
 // Protected route - Render form to get vaccination details while OAuth signin
 router.get('/getVacDetails', (req, res) => {
   var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
-// Protected route - /home.html
-router.get('/speacialGeneralService', requireUserLogin, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', '..', 'public', 'specialgeneralservice.html'));
+// Protected route - Special General Service Form
+router.get('/specialGeneralService', requireUserLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'specialgeneralservice.html'));
 });
 
 /* GET home page. */
@@ -554,5 +560,85 @@ function sendEmailNotification(recipients, subject, message) {
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
   });
 }
+
+// Submit form for packages
+router.post('/submitPackage', function (req, res, next) {
+  const {
+    package,
+    servicePerson,
+    date,
+    time,
+    additionalServices,
+    safetyPreferences,
+    street,
+    suburb,
+    state,
+    country,
+    pin,
+    note,
+    consent,
+    symptoms
+  } = req.body;
+
+  const user_id = req.session.userid;
+
+  const sql = `INSERT INTO package_service(user_id, package, servicePerson, date, time, additionalServices, safetyPreferences, street, suburb, state, country, pin, note, consent, symptoms)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  const values = [
+    user_id,
+    package,
+    servicePerson,
+    date,
+    time,
+    additionalServices,
+    safetyPreferences,
+    street,
+    suburb,
+    state,
+    country,
+    pin,
+    note,
+    consent,
+    symptoms
+  ];
+
+  req.pool.query(sql, values, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({ message: 'Error inserting data', error: err });
+    } else {
+
+      const esql = "SELECT email FROM users WHERE id = ?"
+      const user_id = req.session.userid;
+
+      req.pool.query(esql, user_id, (err, result) => {
+        console.log(result);
+        if (err) {
+          console.log(err);
+          res.status(500).send({ message: 'Error fetching email!', error: err });
+        } else {
+          const recipientEmails = result.map(u => u.email);
+          const subject = `[HomeCarePro] - Booking Recieved: ${package} Package`;
+          const message = `
+          Hi,
+
+          We have successfully recieved your booking! Please review the details below:
+
+          ${package}
+          Date: ${date}
+          Time: ${time}
+          Service Person Preference: ${servicePerson}
+
+          We will try and send a service person that is of your preference but please be informed that itis not always possible to satisfy that condition.
+          `;
+          sendEmailNotification(recipientEmails, subject, message);
+        }
+      });
+
+      res.status(200).send({ message: 'Form submitted successfully!' });
+    }
+  });
+});
 
 module.exports = router;
