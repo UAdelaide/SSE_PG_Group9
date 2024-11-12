@@ -24,9 +24,16 @@
         margin-right: 10px;
       }
     </style>
+    <script>
+        $(document).ready(function() {
+            $("#header").load("/Login/header.html");
+            $("#footer").load("/Login/footer.html");
+        });
+      </script>
   </head>
 
     <body>
+        <div id="header"></div>
         <form class="form-signin" id="branchForm">
             <h2>Additional Information</h2>
             <input type="hidden" id="first_name" name="first_name">
@@ -46,6 +53,7 @@
             </div>
             <button class="btn1 btn-primary btn-block" type="submit">Sign Up</button>
         </form>
+        <div id="footer"></div>
         <script>
              // Populate countries in the dropdown
             function populateCountries() {
@@ -90,7 +98,7 @@
             .then(data => {
                 if (data.success) {
                 alert('User registered successfully!');
-                window.opener.location.href = `/home.html`;
+                window.opener.location.href = `/home`;
                 window.close();
                 } else if(data.check){
                 alert('Warning: ' + data.message);

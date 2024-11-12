@@ -2,27 +2,41 @@ var express = require('express');
 var path = require('path');
 var router = express.Router();
 var path = require('path');
-var mysql = require('mysql2');
+var mysql = require('mysql');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { google } = require('googleapis');
-
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const { userInfo } = require('os');
 
 // Middleware to check if user is logged in
 function requireUserLogin(req, res, next) {
-  if (req.session && req.session.userId) {
-      // If userId exists in session, proceed to the next middleware
+  console.log("is"+req.session.userid);
+  if (req.session.userid) {
       next();
   } else {
       // If not authenticated, redirect to login page
-      res.redirect('/Login');
+      res.redirect('/login');
   }
 }
 
 // Protected route - /home.html
 router.get('/home', requireUserLogin, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', '..', 'public', 'home.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'home.html'));
+});
+
+//Protected route - On Demand Service form
+router.get('/onDemandService',requireUserLogin, function(req, res, next) {
+  var filePath = path.join(__dirname, '..', 'public', 'ondemandservice.html');
+  res.sendFile(filePath);
+});
+
+// Protected route - Render form to get vaccination details while OAuth signin
+router.get('/getVacDetails', (req, res) => {
+  var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
+  res.sendFile(filePath);
 });
 
 // Protected route - /home.html
@@ -56,8 +70,13 @@ router.get('/list', function(req, res, next) {
 });
 
 
-router.get('/Login', function(req, res, next) {
-  var filePath = path.join(__dirname, '..', '..', 'public',  'Login.html');
+router.get('/login', function(req, res, next) {
+  var filePath = path.join(__dirname, '..', 'public', 'Login.html'); // Form to obtain vaccination details
+  res.sendFile(filePath);
+});
+
+router.get('/signup', function(req, res, next) {
+  var filePath = path.join(__dirname, '..', 'public', 'Signup.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
@@ -81,8 +100,9 @@ router.post('/Login', function(req, res, next) {
 
         // Compare plain text password
         if (user.password === password) { // Ideally, hash and compare passwords
-          req.session. id = user.id; // Store user ID in session
-          return res.json({ success: true, id: req.session.id });
+          req.session.userid = user.id; // Store user ID in session
+          console.log(req.session.userid);
+          return res.json({ success: true, id: req.session.userid });
         } else {
           return res.json({ success: false, errorMessage: 'Incorrect password. Please enter a valid password!' });
         }
@@ -106,7 +126,7 @@ router.post('/registerUser', (req, res) => {
       return;
     }
 
-    // Insert the new volunteer
+    // Insert the new user
     const sql = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
     connection.query(sql, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (err, results) => {
       if(err) {
@@ -193,7 +213,7 @@ router.get('/auth/google',
 
 router.get('/auth/google/login',
   passport.authenticate('google', {
-    scope: ['email']  //Only getting required fields for security (login)
+    scope: ['profile','email']  //Only getting required fields for security (login)
   })
 );
 
@@ -218,9 +238,10 @@ router.get('/auth/failure', function (req, res) {
     `);
 });
 
+
 //OAuth Signup
 router.post('/registerUserGOauth', (req, res) => {
-  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = req.body;
+  const { first_name, last_name, dob, country, language, mobile, email, vaccinated } = req.body;
 
   req.pool.getConnection(function(err, connection) {
     if (err) {
@@ -239,9 +260,12 @@ router.post('/registerUserGOauth', (req, res) => {
 
       if (data.length > 0) {
         connection.release();
-        res.status(200).json({ success: false, check: true, message: 'Volunteer already exists! Please login' });
+        res.status(200).json({ success: false, check: true, message: 'User already exists! Please login' });
       } else {
           // Insert the new user
+          const password = generatePassword(12); // Set length as per OWASP 8 - minimum, 12 - improved security
+          console.log(password);
+
           const insertUserQuery = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
           connection.query(insertUserQuery, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (insertError) => {
             if (insertError) {
@@ -260,8 +284,8 @@ router.post('/registerUserGOauth', (req, res) => {
               }
 
               if (newData.length > 0) {
-                req.session.volunteer_id = newData[0].volunteer_id;
-                res.status(200).json({ success: true, volunteer_id:req.session.volunteer_id, message: 'Volunteer registered successfully!' });
+                req.session.userid = newData[0].id;
+                res.status(200).json({ success: true, id:req.session.userid, message: 'User registered successfully!' });
               } else {
                 res.json({ success: false, message: 'Registration error. Please try authentication again!' });
               }
@@ -272,9 +296,12 @@ router.post('/registerUserGOauth', (req, res) => {
     });
 });
 
+// OAuth Login
 router.post('/userLoginGOAuth', function(req, res, next) {
 
+  console.log("abc");
   var username = req.body.user.email;
+  console.log("user"+username);
 
   if (username) {
       var query = `SELECT * FROM users WHERE email = "${username}"`;
@@ -286,10 +313,8 @@ router.post('/userLoginGOAuth', function(req, res, next) {
             }
 
           if(data.length>0){
-              for(var count=0;count<data.length;count++){
-                      req.session.user_id=data[count].user_id;
-                      res.json({ success: true, user_id: req.session.user_id });
-              }
+              req.session.userid = data[0].id;
+              res.json({ success: true, user_id: req.session.userid });
           }else{
               res.json({ success: false, check: true, message: 'Please sign in before login!' });
           }
@@ -299,11 +324,11 @@ router.post('/userLoginGOAuth', function(req, res, next) {
   }
 });
 
+// Render form to get vaccination details while OAuth signin
 router.get('/getVacDetails', (req, res) => {
-    var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
-    res.sendFile(filePath);
+  var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
+  res.sendFile(filePath);
 });
-
 
 router.post('/submitForm', function(req, res, next) {
   const {
@@ -328,7 +353,7 @@ router.post('/submitForm', function(req, res, next) {
     return res.status(400).send({ message: 'Please fill all required fields.' });
   }
 
-  const sql = `INSERT INTO general_special_service(firstName, lastName, email, contact, servicetype, date, preferedCost, hours, street, suburb, state, country, pin, note)
+  const sql = `INSERT INTO general_special_service(firstName, lastName, email, contact, servicetype, dates, preferedCost, hours, street, suburb, state, country, pin, note)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [
@@ -357,6 +382,92 @@ router.post('/submitForm', function(req, res, next) {
     }
   });
 });
+
+// Auto password generation for OAuth login - makes it easier for admins to handle issues with account
+function generatePassword(length) {
+  // Define character sets for a complex password
+  const lowerCase = "abcdefghijklmnopqrstuvwxyz";
+  const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  const specialChars = "!@#$%^&*()_+{}[]|:;<>,.?/~`-=";
+
+  // Concatenate all character sets
+  const allChars = lowerCase + upperCase + numbers + specialChars;
+  let password = "";
+
+  // Ensure password has at least one character from each set
+  password += lowerCase[Math.floor(Math.random() * lowerCase.length)];
+  password += upperCase[Math.floor(Math.random() * upperCase.length)];
+  password += numbers[Math.floor(Math.random() * numbers.length)];
+  password += specialChars[Math.floor(Math.random() * specialChars.length)];
+
+  // Fill the rest of the password length with random characters from all sets
+  for (let i = 4; i < length; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+
+  // Shuffle the password to ensure randomness
+  password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+  return password;
+}
+
+//Password Hash (Using the crypto dependency)
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex'); // Generate a random salt
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha256').toString('hex'); // Hash the password with the salt
+  return { salt: salt, hash: hash };
+}
+
+// Submit form for ondemand service
+router.post('/submitOnDemand', function(req, res, next) {
+  const {
+    serviceType,
+    serviceDay,
+    times,
+    preferedCost = 0,
+    servicePerson,
+    street,
+    suburb,
+    state,
+    country,
+    pin,
+    note
+  } = req.body;
+
+  const user_id = req.session.userid;
+  console.log(user_id);
+
+
+  const sql = `INSERT INTO on_demand_service (user_id, servicetype, serviceday, timeslot, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  const values = [
+    user_id,
+    serviceType,
+    serviceDay,
+    JSON.stringify(times),
+    preferedCost,
+    servicePerson,
+    street,
+    suburb,
+    state,
+    country,
+    pin,
+    note
+  ];
+
+  req.pool.query(sql, values, (err, result) => {
+    console.log(result);
+    if (err) {
+      console.log(err);
+      res.status(500).send({ message: 'Error inserting data', error: err });
+    } else {
+      res.status(200).send({ message: 'Form submitted successfully!' });
+    }
+  });
+});
+
 
 
 module.exports = router;
