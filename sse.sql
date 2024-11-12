@@ -15,14 +15,15 @@ CREATE TABLE users (
     mobile VARCHAR(10) UNIQUE,
     vaccinated varchar(5),
     email VARCHAR(255) UNIQUE NOT NULL,
+    salt VARCHAR(255),
     password VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES
-('Ashwini', 'Manohar', '1990-01-01', 'India', 'Kannada', '0491592039', 'ashwini@gmail.com', 'password123', 'yes'),
-('Tanveer', 'Akram', '1999-03-30', 'India', 'Hindi', '0491758493', 'tanveer@gmail.com', 'password293', 'no'),
-('Sharlene', 'Rodrigues', '2000-04-18', 'India', 'Konkani', '0496811930', 'sharlene@gmail.com', 'password323', 'yes');
+-- INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES
+-- ('Ashwini', 'Manohar', '1990-01-01', 'India', 'Kannada', '0491592039', 'ashwini@gmail.com', 'password123', 'yes'),
+-- ('Tanveer', 'Akram', '1999-03-30', 'India', 'Hindi', '0491758493', 'tanveer@gmail.com', 'password293', 'no'),
+-- ('Sharlene', 'Rodrigues', '2000-04-18', 'India', 'Konkani', '0496811930', 'sharlene@gmail.com', 'password323', 'yes');
 
 CREATE TABLE general_special_service (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,17 +41,21 @@ CREATE TABLE general_special_service (
     country VARCHAR(100),
     pin VARCHAR(20),
     note VARCHAR(200),
+    consent VARCHAR(200),
+    symptoms VARCHAR(200),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE on_demand_service (
     id INT AUTO_INCREMENT PRIMARY KEY,
-
+    user_id INT,
+    firstName VARCHAR(100),
+    lastName VARCHAR(100),
+    email VARCHAR(100),
+    contact VARCHAR(20),
     servicetype VARCHAR(50),
-    email VARCHAR(50),
     date date,
-   times VARCHAR(255),
-
+    times VARCHAR(255),
     preferedCost DECIMAL(10, 2),
     serviceperson VARCHAR(7),
     hours INT,
@@ -60,6 +65,8 @@ CREATE TABLE on_demand_service (
     country VARCHAR(100),
     pin VARCHAR(20),
     issue_desc VARCHAR(200),
+    consent VARCHAR(200),
+    symptoms VARCHAR(200),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
@@ -67,6 +74,10 @@ CREATE TABLE on_demand_service (
 CREATE TABLE package_service (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
+    firstName VARCHAR(100),
+    lastName VARCHAR(100),
+    email VARCHAR(100),
+    contact VARCHAR(20),
     package VARCHAR(50),
     servicePerson VARCHAR(50),
     date date,

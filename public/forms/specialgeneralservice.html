@@ -180,46 +180,6 @@
             return allFilled;
         }
 
-        // function submitForm() {
-        //     if (!validateForm()) return;
-
-        //     const formData = {
-        //         firstName: document.getElementById('firstName').value,
-        //         lastName: document.getElementById('lastName').value,
-        //         email: document.getElementById('email').value,
-        //         contact: document.getElementById('contact').value,
-        //         servicetype: document.getElementById('servicetype').value,
-        //         date: document.getElementById('date').value,
-        //         preferedCost: document.getElementById('preferedCost').value,
-        //         hours: document.getElementById('hours').value,
-        //         street: document.getElementById('street').value,
-        //         suburb: document.getElementById('suburb').value,
-        //         state: document.getElementById('state').value,
-        //         country: document.getElementById('country').value,
-        //         pin: document.getElementById('pin').value,
-        //         note: document.getElementById('note').value
-        //     };
-
-        //     fetch('/submitForm', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify(formData)
-        //     })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         const successMessage = document.getElementById('successMessage');
-        //         if (data.message === 'Form submitted successfully!') {
-        //             successMessage.innerHTML = "Form submitted successfully!";
-        //             setTimeout(() => successMessage.innerHTML = "", 3000);
-        //         } else {
-        //             alert('Error submitting form: ' + data.message);
-        //         }
-        //     })
-        //     .catch(error => console.error('Error submitting form:', error));
-        // }
-
         function submitForm() {
             if (!validateForm()) return;
 
@@ -262,73 +222,8 @@
 
         function logout() {
             sessionStorage.removeItem('email');
-            window.location.href = '/Login.html';
+            window.location.href = '/logout';
         }
-
-        // let dateFieldCount = 1;
-        // const maxDates = 3; // Limit to 3 date fields
-
-        // function addDateField() {
-        //     if (dateFieldCount >= maxDates) {
-        //         alert("You can only add up to 3 dates.");
-        //         return;
-        //     }
-        //     dateFieldCount++;
-
-        //     const container = document.getElementById("date-container");
-        //     const dateFieldWrapper = document.createElement("div");
-        //     dateFieldWrapper.classList.add("input-group", "mt-2", "date-field");
-
-        //     const newDateField = document.createElement("input");
-        //     newDateField.type = "date";
-        //     newDateField.classList.add("form-control");
-        //     newDateField.name = "dates[]";
-        //     newDateField.onchange = updateSelectedDates;
-
-        //     const removeButton = document.createElement("button");
-        //     removeButton.type = "button";
-        //     removeButton.classList.add("btn", "btn-danger");
-        //     removeButton.textContent = "Remove";
-        //     removeButton.onclick = function() {
-        //         removeDateField(removeButton);
-        //     };
-
-        //     const inputGroupAppend = document.createElement("div");
-        //     inputGroupAppend.classList.add("input-group-append");
-        //     inputGroupAppend.appendChild(removeButton);
-
-        //     dateFieldWrapper.appendChild(newDateField);
-        //     dateFieldWrapper.appendChild(inputGroupAppend);
-        //     container.appendChild(dateFieldWrapper);
-
-        //     updateSelectedDates();
-        // }
-
-        // function removeDateField(button) {
-        //     const dateFieldWrapper = button.parentElement.parentElement;
-        //     dateFieldWrapper.remove();
-        //     dateFieldCount--;
-        //     updateSelectedDates();
-        // }
-
-        // function updateSelectedDates() {
-        //     const dates = document.querySelectorAll("input[name='dates[]']");
-        //     const selectedDatesContainer = document.getElementById("selected-dates-container");
-        //     selectedDatesContainer.innerHTML = ""; // Clear previous dates
-
-        //     dates.forEach(dateField => {
-        //         if (dateField.value) {
-        //             const dateItem = document.createElement("p");
-        //             dateItem.textContent = `Selected Date: ${dateField.value}`;
-        //             selectedDatesContainer.appendChild(dateItem);
-        //         }
-        //     });
-        // }
-
-        // window.onload = function() {
-        //     // Initialize the selected dates display
-        //     updateSelectedDates();
-        // };
     </script>
 </body>
 </html>

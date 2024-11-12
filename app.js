@@ -17,6 +17,9 @@ var usersRouter = require('./routes/users');
 
 var mysql = require('mysql');
 
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: true });
+
 var app = express();
 
 // view engine setup
@@ -33,10 +36,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(session({
-    secret : 'webslesson',
-    resave : false,
-    saveUninitialized : true,
-    cookie: { secure: false }
+  secret: 'secur1ty',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    // httpOnly: true, // Prevents JavaScript access to session cookies
+    maxAge: 3600000   // Set the session to expire after 1 hour (3600000 milliseconds)
+  }
 }));
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 app.use(passport.initialize());
@@ -95,6 +101,18 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+app.get('/onDemandService', function (req, res, next) {
+  console.log("Route /onDemandService was accessed.");  // Confirm the route is being triggered
+  var filePath = path.resolve(__dirname, '..', 'public', 'Forms', 'ondemandservice.html');
+  console.log("Resolved file path:", filePath);
+
+  // Check if the file exists
+  if (!fs.existsSync(filePath)) {
+    console.log("File does not exist at this path.");
+    return res.status(404).send('File not found');
+  }
+  res.sendFile(filePath);
+});
 
 
 module.exports = app;

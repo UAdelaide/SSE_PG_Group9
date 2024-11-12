@@ -77,6 +77,26 @@
 
         <form id="packageForm">
             <div class="form-group">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" class="form-control" id="firstName">
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" class="form-control" id="lastName">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email ID</label>
+                    <input type="email" class="form-control" id="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="contact">Phone Number</label>
+                    <input type="tel" class="form-control" id="contact">
+                </div>
+
                 <label for="type-of-package">Package<span class="mandatory">*</span></label>
                 <select id="package" name="package" class="form-control">
                     <option value="Essential Home Maintenance Package">Essential Home Maintenance Package</option>
@@ -142,7 +162,7 @@
             <div class="form-group">
                 <input type="checkbox" id="symptoms" name="symptoms" value="No Symptoms">
                 <label for="symptoms">I confirm I have not experienced COVID symptoms in the last 14 days.</label><br>
-                <input type="checkbox" id="consent" name="consent" value="Data Collection Consent Recieved">
+                <input type="checkbox" id="consent" name="consent" value="Data Collection Consent Recieved" required>
                 <label for="consent">I agree to the Privacy Policy and consent to my data being used to provide the selected services in a COVID-safe manner.</label><br>
             </div>
 
@@ -218,6 +238,10 @@
             if (!validateForm()) return;
 
             const form = document.getElementById("packageForm");
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const contact = document.getElementById('contact').value;
             const package = document.getElementById('package').value;
             const servicePerson = form.elements['servicePerson'].value;
             const date = document.getElementById('date').value;
@@ -253,6 +277,10 @@
 
             const formData = {
                 package,
+                firstName,
+                lastName,
+                contact,
+                email,
                 servicePerson,
                 date,
                 time,
@@ -292,7 +320,7 @@
 
         function logout() {
             sessionStorage.removeItem('email');
-            window.location.href = '/Login.html';
+            window.location.href = '/logout';
         }
     </script>
 </body>
