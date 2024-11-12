@@ -103,16 +103,10 @@
             </div>
 
             <div class="form-group">
-                <label for="dates[]">Select Date(s)</label>
-                <div id="date-container">
-                    <input type="date" class="form-control mt-2" name="dates[]" onchange="updateSelectedDates()">
-                </div>
-                <button type="button" class="btn btn-secondary mt-2" onclick="addDateField()">Add Another Date</button>
+                <label for="date">Select Date</label>
+                <input type="date" class="form-control" id="date">
             </div>
 
-            <div id="selected-dates-container" class="selected-dates">
-                <!-- Selected dates will appear here -->
-            </div>
             <div class="form-group">
                 <label for="preferedCost">Preferred Cost of Service</label>
                 <input type="number" class="form-control" id="preferedCost">
@@ -139,148 +133,200 @@
 
     <footer class="footer"></footer>
 
+     <!-- Modal for successful submission -->
+     <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Submission Successful</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <img images="images" src="images/success image.jpg" alt="green tick image">
+                <div class="modal-body">
+
+                    Your service booking request has been submitted successfully!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function validateForm() {
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const email = document.getElementById('email').value;
-    const contact = document.getElementById('contact').value;
-    const servicetype = document.getElementById('servicetype').value;
+          $('.footer').load('Login/footer.html');
 
-    if (!firstName || !lastName || !email || !contact || !servicetype) {
-        alert("Please fill in all required fields.");
-        return false;
-    }
-    return true;
-}
+          function validateForm() {
+            const requiredFields = ['firstName', 'lastName', 'email', 'contact', 'servicetype', 'date'];
+            let allFilled = true;
 
-function submitForm() {
-    if (!validateForm()) return;
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (!element.value.trim()) {
+                    element.classList.add("is-invalid");
+                    allFilled = false;
+                } else {
+                    element.classList.remove("is-invalid");
+                }
+            });
 
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const email = document.getElementById('email').value;
-    const contact = document.getElementById('contact').value;
-    const servicetype = document.getElementById('servicetype').value;
-    const dates = Array.from(document.querySelectorAll("input[name='dates[]']")).map(input => input.value);
-    const preferedCost = document.getElementById('preferedCost').value;
-    const hours = document.getElementById('hours').value;
-    const street = document.getElementById('street').value;
-    const suburb = document.getElementById('suburb').value;
-    const state = document.getElementById('state').value;
-    const country = document.getElementById('country').value;
-    const pin = document.getElementById('pin').value;
-    const note = document.getElementById('note').value;
+            if (!allFilled) {
+                alert("Please fill in all required fields.");
+            }
 
-    const formData = {
-        firstName,
-        lastName,
-        email,
-        contact,
-        servicetype,
-        dates,
-        preferedCost,
-        hours,
-        street,
-        suburb,
-        state,
-        country,
-        pin,
-        note
-    };
-
-    fetch('/submitForm', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message === 'Form submitted successfully!') {
-            const successMessage = document.getElementById('successMessage');
-            successMessage.innerHTML = "Form submitted successfully!";
-            setTimeout(() => successMessage.innerHTML = "", 3000);
-        } else {
-            alert('Error submitting form: ' + data.message);
+            return allFilled;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error submitting form.');
-    });
-}
 
+        // function submitForm() {
+        //     if (!validateForm()) return;
+
+        //     const formData = {
+        //         firstName: document.getElementById('firstName').value,
+        //         lastName: document.getElementById('lastName').value,
+        //         email: document.getElementById('email').value,
+        //         contact: document.getElementById('contact').value,
+        //         servicetype: document.getElementById('servicetype').value,
+        //         date: document.getElementById('date').value,
+        //         preferedCost: document.getElementById('preferedCost').value,
+        //         hours: document.getElementById('hours').value,
+        //         street: document.getElementById('street').value,
+        //         suburb: document.getElementById('suburb').value,
+        //         state: document.getElementById('state').value,
+        //         country: document.getElementById('country').value,
+        //         pin: document.getElementById('pin').value,
+        //         note: document.getElementById('note').value
+        //     };
+
+        //     fetch('/submitForm', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify(formData)
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         const successMessage = document.getElementById('successMessage');
+        //         if (data.message === 'Form submitted successfully!') {
+        //             successMessage.innerHTML = "Form submitted successfully!";
+        //             setTimeout(() => successMessage.innerHTML = "", 3000);
+        //         } else {
+        //             alert('Error submitting form: ' + data.message);
+        //         }
+        //     })
+        //     .catch(error => console.error('Error submitting form:', error));
+        // }
+
+        function submitForm() {
+            if (!validateForm()) return;
+
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                contact: document.getElementById('contact').value,
+                servicetype: document.getElementById('servicetype').value,
+                date: document.getElementById('date').value,
+                preferedCost: document.getElementById('preferedCost').value,
+                hours: document.getElementById('hours').value,
+                street: document.getElementById('street').value,
+                suburb: document.getElementById('suburb').value,
+                state: document.getElementById('state').value,
+                country: document.getElementById('country').value,
+                pin: document.getElementById('pin').value,
+                note: document.getElementById('note').value
+            };
+
+            fetch('/submitForm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Form submitted successfully!') {
+                    // Show the success modal
+                    $('#successModal').modal('show');
+                } else {
+                    alert('Error submitting form: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error submitting form:', error));
+        }
         function logout() {
             sessionStorage.removeItem('email');
             window.location.href = '/Login.html';
         }
 
-        let dateFieldCount = 1;
-        const maxDates = 3; // Limit to 3 date fields
+        // let dateFieldCount = 1;
+        // const maxDates = 3; // Limit to 3 date fields
 
-        function addDateField() {
-            if (dateFieldCount >= maxDates) {
-                alert("You can only add up to 3 dates.");
-                return;
-            }
-            dateFieldCount++;
+        // function addDateField() {
+        //     if (dateFieldCount >= maxDates) {
+        //         alert("You can only add up to 3 dates.");
+        //         return;
+        //     }
+        //     dateFieldCount++;
 
-            const container = document.getElementById("date-container");
-            const dateFieldWrapper = document.createElement("div");
-            dateFieldWrapper.classList.add("input-group", "mt-2", "date-field");
+        //     const container = document.getElementById("date-container");
+        //     const dateFieldWrapper = document.createElement("div");
+        //     dateFieldWrapper.classList.add("input-group", "mt-2", "date-field");
 
-            const newDateField = document.createElement("input");
-            newDateField.type = "date";
-            newDateField.classList.add("form-control");
-            newDateField.name = "dates[]";
-            newDateField.onchange = updateSelectedDates;
+        //     const newDateField = document.createElement("input");
+        //     newDateField.type = "date";
+        //     newDateField.classList.add("form-control");
+        //     newDateField.name = "dates[]";
+        //     newDateField.onchange = updateSelectedDates;
 
-            const removeButton = document.createElement("button");
-            removeButton.type = "button";
-            removeButton.classList.add("btn", "btn-danger");
-            removeButton.textContent = "Remove";
-            removeButton.onclick = function() {
-                removeDateField(removeButton);
-            };
+        //     const removeButton = document.createElement("button");
+        //     removeButton.type = "button";
+        //     removeButton.classList.add("btn", "btn-danger");
+        //     removeButton.textContent = "Remove";
+        //     removeButton.onclick = function() {
+        //         removeDateField(removeButton);
+        //     };
 
-            const inputGroupAppend = document.createElement("div");
-            inputGroupAppend.classList.add("input-group-append");
-            inputGroupAppend.appendChild(removeButton);
+        //     const inputGroupAppend = document.createElement("div");
+        //     inputGroupAppend.classList.add("input-group-append");
+        //     inputGroupAppend.appendChild(removeButton);
 
-            dateFieldWrapper.appendChild(newDateField);
-            dateFieldWrapper.appendChild(inputGroupAppend);
-            container.appendChild(dateFieldWrapper);
+        //     dateFieldWrapper.appendChild(newDateField);
+        //     dateFieldWrapper.appendChild(inputGroupAppend);
+        //     container.appendChild(dateFieldWrapper);
 
-            updateSelectedDates();
-        }
+        //     updateSelectedDates();
+        // }
 
-        function removeDateField(button) {
-            const dateFieldWrapper = button.parentElement.parentElement;
-            dateFieldWrapper.remove();
-            dateFieldCount--;
-            updateSelectedDates();
-        }
+        // function removeDateField(button) {
+        //     const dateFieldWrapper = button.parentElement.parentElement;
+        //     dateFieldWrapper.remove();
+        //     dateFieldCount--;
+        //     updateSelectedDates();
+        // }
 
-        function updateSelectedDates() {
-            const dates = document.querySelectorAll("input[name='dates[]']");
-            const selectedDatesContainer = document.getElementById("selected-dates-container");
-            selectedDatesContainer.innerHTML = ""; // Clear previous dates
+        // function updateSelectedDates() {
+        //     const dates = document.querySelectorAll("input[name='dates[]']");
+        //     const selectedDatesContainer = document.getElementById("selected-dates-container");
+        //     selectedDatesContainer.innerHTML = ""; // Clear previous dates
 
-            dates.forEach(dateField => {
-                if (dateField.value) {
-                    const dateItem = document.createElement("p");
-                    dateItem.textContent = `Selected Date: ${dateField.value}`;
-                    selectedDatesContainer.appendChild(dateItem);
-                }
-            });
-        }
+        //     dates.forEach(dateField => {
+        //         if (dateField.value) {
+        //             const dateItem = document.createElement("p");
+        //             dateItem.textContent = `Selected Date: ${dateField.value}`;
+        //             selectedDatesContainer.appendChild(dateItem);
+        //         }
+        //     });
+        // }
 
-        window.onload = function() {
-            // Initialize the selected dates display
-            updateSelectedDates();
-        };
+        // window.onload = function() {
+        //     // Initialize the selected dates display
+        //     updateSelectedDates();
+        // };
     </script>
 </body>
 </html>

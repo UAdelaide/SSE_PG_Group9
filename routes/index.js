@@ -31,9 +31,7 @@ router.get('/speacialGeneralService', requireUserLogin, (req, res) => {
   res.sendFile(path.join(__dirname, '..', '..', 'public', 'specialgeneralservice.html'));
 });
 
-      res.redirect('/Login.html'); // Redirect to login if no session
-  }
-});
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -310,15 +308,15 @@ router.get('/getVacDetails', (req, res) => {
     res.sendFile(filePath);
 });
 
-// Submit form for special service
+
 router.post('/submitForm', function(req, res, next) {
   const {
     firstName,
     lastName,
     email,
     contact,
-    serviceType,
-    dates,
+    servicetype,
+    date,
     preferedCost,
     hours,
     street,
@@ -329,7 +327,12 @@ router.post('/submitForm', function(req, res, next) {
     note
   } = req.body;
 
-  const sql = `INSERT INTO general_special_service (first_name, last_name, email, contact, service_type, dates, prefered_cost, hours, street, suburb, state, country, pin, note)
+  // Basic Validation (check required fields)
+  if (!firstName || !lastName || !email || !contact || !servicetype || !date) {
+    return res.status(400).send({ message: 'Please fill all required fields.' });
+  }
+
+  const sql = `INSERT INTO general_special_service(firstName, lastName, email, contact, servicetype, date, preferedCost, hours, street, suburb, state, country, pin, note)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [
@@ -337,8 +340,8 @@ router.post('/submitForm', function(req, res, next) {
     lastName,
     email,
     contact,
-    serviceType,
-    JSON.stringify(dates), // Store dates as JSON string
+    servicetype,
+    date,
     preferedCost,
     hours,
     street,
@@ -351,10 +354,13 @@ router.post('/submitForm', function(req, res, next) {
 
   req.pool.query(sql, values, (err, result) => {
     if (err) {
+      console.error(err);
       res.status(500).send({ message: 'Error inserting data', error: err });
     } else {
       res.status(200).send({ message: 'Form submitted successfully!' });
     }
   });
 });
+
+
 module.exports = router;
