@@ -45,10 +45,12 @@ CREATE TABLE general_special_service (
 
 CREATE TABLE on_demand_service (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
+
     servicetype VARCHAR(50),
-    serviceday VARCHAR(50),
-    timeslot VARCHAR(200),
+    email VARCHAR(50),
+    date date,
+   times VARCHAR(255),
+
     preferedCost DECIMAL(10, 2),
     serviceperson VARCHAR(7),
     hours INT,

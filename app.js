@@ -55,8 +55,10 @@ app.use(function(req, res, next) {
 });
 
 
+const xss = require('xss-clean');
 
-
+// Use xss-clean to sanitize all incoming data
+app.use(xss());
 
 app.use(logger('dev'));
 app.use(express.json());

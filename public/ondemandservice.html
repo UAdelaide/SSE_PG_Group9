@@ -89,30 +89,25 @@
                     <option value="heatingCooling">Heating & Cooling</option>
                 </select>
             </div>
+             <div class="form-group">
+                <label for="email">Email ID</label>
+                <input type="email" class="form-control" id="email">
+            </div>
+            <div class="form-group">
+                <label for="date">Select Date</label>
+                <input type="date" class="form-control" id="date">
+            </div>
 
             <div class="form-group">
-                <label for="serviceday">Day of Service<span class="mandatory">*</span></label><br>
-                <input type="radio" id="html" name="serviceday" value="same">
-                <label for="same">Same Day</label><br>
-                <input type="radio" id="css" name="serviceday" value="next">
-                <label for="next">Next Day</label><br>
+                <label for="times">Time Slot</label>
+                <input type="time" class="form-control" id="times">
             </div>
-
-            <div class="form-group">
-                <label for="times[]">Time Slot</label>
-                <div id="time-container">
-                    <input type="time" class="form-control mt-2" name="times[]" onchange="updateSelectedTimes()">
-                </div>
-                <button type="button" class="btn btn-secondary mt-2" onclick="addTimeField()">Add Another Slot</button>
-            </div>
-            <div id="selected-times-container" class="selected-times">
-                <!-- Selected dates will appear here -->
-            </div>
-
             <div class="form-group">
                 <label for="preferedCost">Preferred Cost of Service<span class="mandatory">*</span></label>
                 <input type="number" class="form-control" id="preferedCost">
             </div>
+
+
 
             <div class="form-group">
                 <label for="servicePerson">Any preference of Service Person</label><br>
@@ -140,7 +135,6 @@
         </form>
     </div>
 
-    <footer class="footer"></footer>
     <!-- Modal for successful submission -->
     <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -164,172 +158,92 @@
         </div>
     </div>
 
+    <footer class="footer"></footer>
+
     <script>
-
-    // function validateForm() {
-    //         const requiredFields = ['servicetype', 'preferedCost', 'serviceday', 'street', 'suburb', 'state', 'country', 'pin'];
-    //         let allFilled = true;
-
-    //         requiredFields.forEach(field => {
-    //             const element = document.getElementById(field);
-    //             if (!element.value.trim()) {
-    //                 element.classList.add("is-invalid");
-    //                 allFilled = false;
-    //             } else {
-    //                 element.classList.remove("is-invalid");
-    //             }
-    //         });
-
-    //         if (!allFilled) {
-    //             alert("Please fill in all required fields.");
-    //         }
-
-    //         return allFilled;
-    //     }
-
+        // Validate the form to check if required fields are filled
         function validateForm() {
+            const requiredFields = ['servicetype', 'preferedCost', 'email', 'date', 'street', 'suburb', 'state', 'country', 'pin'];
+            let allFilled = true;
 
-    const form = document.getElementById("onDemandForm");
-    const servicetype = document.getElementById('servicetype').value;
-    console.log(servicetype);
-    const preferedCost = document.getElementById('preferedCost').value;
-    const serviceday = form.elements["serviceday"].value;
-    console.log(serviceday);
-    const street = document.getElementById('street').value;
-    const suburb = document.getElementById('suburb').value;
-    const state = document.getElementById('state').value;
-    const country = document.getElementById('country').value;
-    const pin = document.getElementById('pin').value;
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (!element.value.trim()) {
+                    element.classList.add("is-invalid");
+                    allFilled = false;
+                } else {
+                    element.classList.remove("is-invalid");
+                }
+            });
 
-    if (!servicetype| !serviceday| !street| !suburb| !state| !country| !pin| !preferedCost) {
-        alert("Please fill in all required fields.");
-        return false;
-    }
-    return true;
-}
-
-function submitForm() {
-    console.log("abc");
-    if (!validateForm()) return;
-
-    const form = document.getElementById("onDemandForm");
-    const servicetype = document.getElementById('servicetype').value;
-    const serviceday = form.elements["serviceday"].value;
-    const times = Array.from(document.querySelectorAll("input[name='times[]']")).map(input => input.value);
-    const preferedCost = document.getElementById('preferedCost').value;
-    const servicePerson = form.elements['servicePerson'].value;
-    const street = document.getElementById('street').value;
-    const suburb = document.getElementById('suburb').value;
-    const state = document.getElementById('state').value;
-    const country = document.getElementById('country').value;
-    const pin = document.getElementById('pin').value;
-    const note = document.getElementById('issue').value;
-
-    const formData = {
-        servicetype,
-        serviceday,
-        times,
-        preferedCost,
-        servicePerson,
-        street,
-        suburb,
-        state,
-        country,
-        pin,
-        note
-    };
-
-    fetch('/submitOnDemand', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message === 'Form submitted successfully!') {
-            // Show the success modal
-            $('#successModal').modal('show');
-        } else {
-            alert('Error submitting form: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error submitting form.');
-    });
-}
-
-        function logout() {
-            sessionStorage.removeItem('email');
-            window.location.href = '/Login.html';
-        }
-
-        let timeFieldCount = 1;
-        const maxTimes = 3; // Limit to 3 date fields
-
-        function addTimeField() {
-            if (timeFieldCount >= maxTimes) {
-                alert("You can only add up to 3 time slots.");
-                return;
+            if (!allFilled) {
+                alert("Please fill in all required fields.");
             }
-            timeFieldCount++;
 
-            const container = document.getElementById("time-container");
-            const timeFieldWrapper = document.createElement("div");
-            timeFieldWrapper.classList.add("input-group", "mt-2", "time-field");
+            return allFilled;
+        }
 
-            const newTimeField = document.createElement("input");
-            newTimeField.type = "time";
-            newTimeField.classList.add("form-control");
-            newTimeField.name = "times[]";
-            newTimeField.onchange = updateSelectedTimes;
+        // Function to submit the form and send the data to the server
+        function submitForm() {
+            // First, validate the form
+            if (!validateForm()) return;
 
-            const removeButton = document.createElement("button");
-            removeButton.type = "button";
-            removeButton.classList.add("btn", "btn-danger");
-            removeButton.textContent = "Remove";
-            removeButton.onclick = function() {
-                removeTimeField(removeButton);
+            const form = document.getElementById("onDemandForm");
+            const servicetype = document.getElementById('servicetype').value;
+            // const serviceday = form.elements["serviceday"].value;
+            const email = document.getElementById('email').value;
+            const date = document.getElementById('date').value;
+            const times = document.getElementById('times').value;
+            const preferedCost = document.getElementById('preferedCost').value;
+            const servicePerson = form.elements['servicePerson'].value;
+            const street = document.getElementById('street').value;
+            const suburb = document.getElementById('suburb').value;
+            const state = document.getElementById('state').value;
+            const country = document.getElementById('country').value;
+            const pin = document.getElementById('pin').value;
+            const note = document.getElementById('issue').value;
+
+            const formData = {
+                servicetype,
+                email,
+                date,
+                times,
+                preferedCost,
+                servicePerson,
+                street,
+                suburb,
+                state,
+                country,
+                pin,
+                note
             };
 
-            const inputGroupAppend = document.createElement("div");
-            inputGroupAppend.classList.add("input-group-append");
-            inputGroupAppend.appendChild(removeButton);
-
-            timeFieldWrapper.appendChild(newTimeField);
-            timeFieldWrapper.appendChild(inputGroupAppend);
-            container.appendChild(timeFieldWrapper);
-
-            updateSelectedTimes();
-        }
-
-        function removeTimeField(button) {
-            const timeFieldWrapper = button.parentElement.parentElement;
-            timeFieldWrapper.remove();
-            timeFieldCount--;
-            updateSelectedTimes();
-        }
-
-        function updateSelectedTimes() {
-            const times = document.querySelectorAll("input[name='times[]']");
-            const selectedTimesContainer = document.getElementById("selected-times-container");
-            selectedTimesContainer.innerHTML = ""; // Clear previous dates
-
-            times.forEach(timeField => {
-                if (timeField.value) {
-                    const timeItem = document.createElement("p");
-                    timeItem.textContent = `Selected Time: ${timeField.value}`;
-                    selectedTimesContainer.appendChild(timeItem);
+            // Send the form data to the server
+            fetch('/submitOnDemand', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Form submitted successfully!') {
+                    // Show the success modal
+                    $('#successModal').modal('show');
+                } else {
+                    alert('Error submitting form: ' + data.message);
                 }
+            })
+            .catch(error => {
+                console.error("Error:", error);
             });
         }
 
-        window.onload = function() {
-            // Initialize the selected dates display
-            updateSelectedTimes();
-        };
+        // Logout function (simple redirect)
+        function logout() {
+            window.location.href = '/logout';
+        }
     </script>
 </body>
 </html>
