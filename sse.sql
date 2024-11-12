@@ -33,16 +33,16 @@ INSERT INTO users (first_name, last_name, dob, country, language, mobile, email,
 -- ('emmanuel@gmail.com', 'password234'),
 -- ('punlapa@gmail.com', '12345678'),
 -- ('Leah@gmail.com', '123456'),
+-- -- ('vishal@gmail.com', 'password323');
+-- INSERT INTO users (email, password ) VALUES
+-- ('ashwini@gmail.com', 'password123'),
+-- ('tanveer@gmail.com', 'password456'),
+-- ('sharlene@gmail.com', 'password789'),
+-- ('tung@gmail.com', 'password321'),
+-- ('emmanuel@gmail.com', 'password234'),
+-- ('punlapa@gmail.com', '12345678'),
+-- ('Leah@gmail.com', '123456'),
 -- ('vishal@gmail.com', 'password323');
-INSERT INTO users (email, password ) VALUES
-('ashwini@gmail.com', 'password123'),
-('tanveer@gmail.com', 'password456'),
-('sharlene@gmail.com', 'password789'),
-('tung@gmail.com', 'password321'),
-('emmanuel@gmail.com', 'password234'),
-('punlapa@gmail.com', '12345678'),
-('Leah@gmail.com', '123456'),
-('vishal@gmail.com', 'password323');
 
 
 CREATE TABLE general_special_service (
@@ -52,7 +52,7 @@ CREATE TABLE general_special_service (
     email VARCHAR(100),
     contact VARCHAR(20),
     servicetype VARCHAR(50),
-    dates VARCHAR(200),
+    date VARCHAR(200),
     preferedCost DECIMAL(10, 2),
     hours INT,
     street VARCHAR(255),

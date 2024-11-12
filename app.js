@@ -15,7 +15,7 @@ var session = require('express-session');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
-var mysql = require('mysql2');
+var mysql = require('mysql');
 
 var app = express();
 
