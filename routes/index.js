@@ -448,13 +448,66 @@ function hashPassword(password) {
   return { salt: salt, hash: hash };
 }
 
+// // Submit form for ondemand service
+// router.post('/submitOnDemand', function(req, res, next) {
+//   const {
+//     serviceType,
+//     serviceDay,
+//     times,
+//     preferedCost = 0,
+//     servicePerson,
+//     street,
+//     suburb,
+//     state,
+//     country,
+//     pin,
+//     note
+//   } = req.body;
+
+//   const user_id = req.session.userid;
+//   console.log(user_id);
+
+
+//   const sql = `INSERT INTO on_demand_service (user_id, servicetype, serviceday, timeslot, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
+//               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+//   const values = [
+//     user_id,
+//     serviceType,
+//     serviceDay,
+//     times,
+//     preferedCost,
+//     servicePerson,
+//     street,
+//     suburb,
+//     state,
+//     country,
+//     pin,
+//     note
+//   ];
+
+//   req.pool.query(sql, values, (err, result) => {
+//     console.log(result);
+//     if (err) {
+//       console.log(err);
+//       res.status(500).send({ message: 'Error inserting data', error: err });
+//     } else {
+//       res.status(200).send({ message: 'Form submitted successfully!' });
+//     }
+//   });
+// });
+
 // Submit form for ondemand service
 router.post('/submitOnDemand', function (req, res, next) {
   const {
-    servicetype,
+    serviceType,
+    email,
+    date,
+
     serviceday,
     times,
     preferedCost,
+
     servicePerson,
     street,
     suburb,
@@ -467,13 +520,20 @@ router.post('/submitOnDemand', function (req, res, next) {
   const user_id = req.session.userid;
   console.log(servicetype);
 
+  // If times is an array, we can store it as a JSON string in the database
+  const timesFormatted = JSON.stringify(times);
 
-  const sql = `INSERT INTO on_demand_service (user_id, servicetype, serviceday, timeslot, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
+  const sql = `INSERT INTO on_demand_service (servicetype,email, date, times, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [
+    serviceType,
+    email,
+    date,
+    timesFormatted, // Save times as a JSON string
+    preferedCost || 0, // Default to 0 if not provided
     user_id,
-    servicetype,
+
     serviceday,
     JSON.stringify(times),
     preferedCost,
@@ -487,11 +547,11 @@ router.post('/submitOnDemand', function (req, res, next) {
   ];
 
   req.pool.query(sql, values, (err, result) => {
-    console.log(result);
     if (err) {
-      console.log(err);
-      res.status(500).send({ message: 'Error inserting data', error: err });
+      console.error('Error inserting data:', err);
+      res.status(500).send({ message: 'Error inserting data into the database.', error: err });
     } else {
+      console.log('Data inserted successfully:', result);
       const esql = "SELECT email FROM users WHERE id = ?"
 
       req.pool.query(esql, user_id, (err, result) => {
@@ -640,5 +700,6 @@ router.post('/submitPackage', function (req, res, next) {
     }
   });
 });
+
 
 module.exports = router;
