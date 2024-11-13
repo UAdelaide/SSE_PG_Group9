@@ -40,7 +40,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    // httpOnly: true, // Prevents JavaScript access to session cookies
+    httpOnly: true, // Prevents JavaScript access to session cookies
     maxAge: 3600000   // Set the session to expire after 1 hour (3600000 milliseconds)
   }
 }));

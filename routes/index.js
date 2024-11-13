@@ -25,9 +25,10 @@ function requireUserLogin(req, res, next) {
   }
 }
 
-// Protected route - /home.html
+// Protected route - Home page
 router.get('/home', requireUserLogin, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'home.html'));
+  var filePath = path.join(__dirname, '..', 'public', 'home', 'home.html');
+  res.sendFile(filePath);
 });
 
 //Protected route - On Demand Service form
@@ -58,6 +59,7 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+// List all users
 router.get('/list', function (req, res, next) {
   req.pool.getConnection(function (err, connection) {
     if (err) {
@@ -76,14 +78,15 @@ router.get('/list', function (req, res, next) {
   });
 });
 
-
+// Protected Route - Login page
 router.get('/login', function (req, res, next) {
-  var filePath = path.join(__dirname, '..', 'public', 'Login.html'); // Form to obtain vaccination details
+  var filePath = path.join(__dirname, '..', 'public', 'Login', 'Login.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
+// Protected Route - Signup page
 router.get('/signup', function (req, res, next) {
-  var filePath = path.join(__dirname, '..', 'public', 'Signup.html'); // Form to obtain vaccination details
+  var filePath = path.join(__dirname, '..', 'public', 'SignUp', 'Signup.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
@@ -157,7 +160,7 @@ router.post('/registerUser', (req, res) => {
         if (err) {
           return res.status(500).send('Session regeneration failed');
         }
-        req.session.userid = user.id;// Set user data in session
+        req.session.userid = user_id;// Set user data in session
         connection.release();
         res.status(200).json({ success: true, user_id: req.session.user_id, message: 'User registered successfully!' });
       });
