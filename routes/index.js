@@ -134,10 +134,9 @@ router.post('/Login', function (req, res, next) {
 
 //Sign Up
 router.post('/registerUser', (req, res) => {
-  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = sanitizeHtml(req.body);
+  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = req.body;
 
   const { salt, hashedPassword } = hashPassword(password);
-  console.log(salt + "  " + hashedPassword);
 
   req.pool.getConnection((err, connection) => {
     if (err) {
@@ -177,7 +176,6 @@ router.get('/logout', function (req, res, next) {
     }
     res.clearCookie('connect.sid'); // Clear the session cookie
     res.redirect('/login');
-    res.send('Logged out successfully');
   });
 });
 
@@ -243,7 +241,6 @@ router.get('/auth/google',
     scope: ['profile',
       'email',
       'https://www.googleapis.com/auth/user.birthday.read',
-      'https://www.googleapis.com/auth/user.gender.read',
       'https://www.googleapis.com/auth/user.phonenumbers.read']
   })
 );
@@ -278,7 +275,7 @@ router.get('/auth/failure', function (req, res) {
 
 //OAuth Signup
 router.post('/registerUserGOauth', (req, res) => {
-  const { first_name, last_name, dob, country, language, mobile, email, vaccinated } = sanitizeHtml(req.body);
+  const { first_name, last_name, dob, country, language, mobile, email, vaccinated } = req.body;
 
   req.pool.getConnection(function (err, connection) {
     if (err) {
@@ -391,7 +388,7 @@ router.post('/submitForm', function (req, res, next) {
     note,
     consent,
     symptoms
-  } = sanitizeHtml(req.body);
+  } = req.body;
 
   // Basic Validation (check required fields)
   if (!firstName || !lastName || !email || !contact || !servicetype || !date) {
@@ -525,7 +522,7 @@ router.post('/submitOnDemand', function (req, res, next) {
     note,
     consent,
     symptoms
-  } = sanitizeHtml(req.body);
+  } = req.body;
 
   const user_id = req.session.userid;
   console.log(servicetype);
@@ -633,7 +630,7 @@ router.post('/submitPackage', function (req, res, next) {
     date,
     time,
     additionalServices,
-    safetyPreferences,
+    safetyPreferences = 'null',
     street,
     suburb,
     state,
@@ -642,7 +639,7 @@ router.post('/submitPackage', function (req, res, next) {
     note,
     consent,
     symptoms
-  } = sanitizeHtml(req.body);
+  } = req.body;
 
   const user_id = req.session.userid;
 

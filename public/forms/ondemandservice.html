@@ -275,7 +275,7 @@
                     })
                         .then(response => response.json())
                         .then(data => {
-                            if (data.message === 'Form submitted successfully!') {
+                            if (data.message === 'Form submitted successfully! Please check your email for details.') {
                                 // Show the success modal
                                 $('#successModal').modal('show');
                             } else {
