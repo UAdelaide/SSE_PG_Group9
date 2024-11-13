@@ -60,6 +60,10 @@ const xss = require('xss-clean');
 // Use xss-clean to sanitize all incoming data
 app.use(xss());
 
+// Use Helmet to secure headers
+const helmet = require('helmet');
+app.use(helmet());
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
