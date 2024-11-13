@@ -10,6 +10,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { userInfo } = require('os');
 const session = require('express-session');
+const sanitizeHtml = require('sanitize-html');
 
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
@@ -92,8 +93,8 @@ router.get('/signup', function (req, res, next) {
 
 // POST login
 router.post('/Login', function (req, res, next) {
-  var username = req.body.username;
-  var password = req.body.password;
+  var username = sanitizeHtml(req.body.username);
+  var password = sanitizeHtml(req.body.password);
 
   if (username && password) {
     // Use parameterized queries to avoid SQL injection
@@ -133,7 +134,7 @@ router.post('/Login', function (req, res, next) {
 
 //Sign Up
 router.post('/registerUser', (req, res) => {
-  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = req.body;
+  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = sanitizeHtml(req.body);
 
   const { salt, hashedPassword } = hashPassword(password);
   console.log(salt + "  " + hashedPassword);
@@ -277,7 +278,7 @@ router.get('/auth/failure', function (req, res) {
 
 //OAuth Signup
 router.post('/registerUserGOauth', (req, res) => {
-  const { first_name, last_name, dob, country, language, mobile, email, vaccinated } = req.body;
+  const { first_name, last_name, dob, country, language, mobile, email, vaccinated } = sanitizeHtml(req.body);
 
   req.pool.getConnection(function (err, connection) {
     if (err) {
@@ -344,9 +345,7 @@ router.post('/registerUserGOauth', (req, res) => {
 // OAuth Login
 router.post('/userLoginGOAuth', function (req, res, next) {
 
-  console.log("abc");
-  var username = req.body.user.email;
-  console.log("user" + username);
+  var username = sanitizeHtml(req.body.user.email);
 
   if (username) {
     var query = `SELECT * FROM users WHERE email = "${username}"`;
@@ -374,12 +373,6 @@ router.post('/userLoginGOAuth', function (req, res, next) {
   }
 });
 
-// Render form to get vaccination details while OAuth signin
-router.get('/getVacDetails', (req, res) => {
-  var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
-  res.sendFile(filePath);
-});
-
 router.post('/submitForm', function (req, res, next) {
   const {
     firstName,
@@ -398,7 +391,7 @@ router.post('/submitForm', function (req, res, next) {
     note,
     consent,
     symptoms
-  } = req.body;
+  } = sanitizeHtml(req.body);
 
   // Basic Validation (check required fields)
   if (!firstName || !lastName || !email || !contact || !servicetype || !date) {
@@ -532,7 +525,7 @@ router.post('/submitOnDemand', function (req, res, next) {
     note,
     consent,
     symptoms
-  } = req.body;
+  } = sanitizeHtml(req.body);
 
   const user_id = req.session.userid;
   console.log(servicetype);
@@ -649,7 +642,7 @@ router.post('/submitPackage', function (req, res, next) {
     note,
     consent,
     symptoms
-  } = req.body;
+  } = sanitizeHtml(req.body);
 
   const user_id = req.session.userid;
 
