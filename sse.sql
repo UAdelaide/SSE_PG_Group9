@@ -20,10 +20,10 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES
--- ('Ashwini', 'Manohar', '1990-01-01', 'India', 'Kannada', '0491592039', 'ashwini@gmail.com', 'password123', 'yes'),
--- ('Tanveer', 'Akram', '1999-03-30', 'India', 'Hindi', '0491758493', 'tanveer@gmail.com', 'password293', 'no'),
--- ('Sharlene', 'Rodrigues', '2000-04-18', 'India', 'Konkani', '0496811930', 'sharlene@gmail.com', 'password323', 'yes');
+INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES
+('Ashwini', 'Manohar', '1990-01-01', 'India', 'Kannada', '0491592039', 'ashwini@gmail.com', 'password123', 'yes'),
+('Tanveer', 'Akram', '1999-03-30', 'India', 'Hindi', '0491758493', 'tanveer@gmail.com', 'password293', 'no'),
+('Sharlene', 'Rodrigues', '2000-04-18', 'India', 'Konkani', '0496811930', 'sharlene@gmail.com', 'password323', 'yes');
 
 CREATE TABLE general_special_service (
     id INT AUTO_INCREMENT PRIMARY KEY,
