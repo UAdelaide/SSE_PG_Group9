@@ -5,11 +5,15 @@ var path = require('path');
 var mysql = require('mysql');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var passport = require('passport');
-var GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { userInfo } = require('os');
+const session = require('express-session');
+const sanitizeHtml = require('sanitize-html');
+
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: true });
 
 // Middleware to check if user is logged in
 function requireUserLogin(req, res, next) {
@@ -22,32 +26,33 @@ function requireUserLogin(req, res, next) {
   }
 }
 
-// Protected route - /home.html
+// Protected route - Home page
 router.get('/home', requireUserLogin, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'home.html'));
+  var filePath = path.join(__dirname, '..', 'public', 'home', 'home.html');
+  res.sendFile(filePath);
 });
 
 //Protected route - On Demand Service form
 router.get('/onDemandService', requireUserLogin, function (req, res, next) {
-  var filePath = path.join(__dirname, '..', 'public', 'ondemandservice.html');
+  var filePath = path.join(__dirname, '..', 'public', 'forms', 'ondemandservice.html');
   res.sendFile(filePath);
 });
 
 //Protected route - Service Package Form
 router.get('/package', requireUserLogin, function (req, res, next) {
-  var filePath = path.join(__dirname, '..', 'public', 'servicepackage.html');
+  var filePath = path.join(__dirname, '..', 'public', 'forms', 'servicepackage.html');
   res.sendFile(filePath);
 });
 
 // Protected route - Render form to get vaccination details while OAuth signin
 router.get('/getVacDetails', (req, res) => {
-  var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
+  var filePath = path.join(__dirname, '..', 'public', 'forms', 'VacDetailsForm.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
 // Protected route - Special General Service Form
 router.get('/specialGeneralService', requireUserLogin, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'specialgeneralservice.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'forms', 'specialgeneralservice.html'));
 });
 
 /* GET home page. */
@@ -55,6 +60,7 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+// List all users
 router.get('/list', function (req, res, next) {
   req.pool.getConnection(function (err, connection) {
     if (err) {
@@ -73,21 +79,22 @@ router.get('/list', function (req, res, next) {
   });
 });
 
-
+// Protected Route - Login page
 router.get('/login', function (req, res, next) {
-  var filePath = path.join(__dirname, '..', 'public', 'Login.html'); // Form to obtain vaccination details
+  var filePath = path.join(__dirname, '..', 'public', 'Login', 'Login.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
+// Protected Route - Signup page
 router.get('/signup', function (req, res, next) {
-  var filePath = path.join(__dirname, '..', 'public', 'Signup.html'); // Form to obtain vaccination details
+  var filePath = path.join(__dirname, '..', 'public', 'SignUp', 'Signup.html'); // Form to obtain vaccination details
   res.sendFile(filePath);
 });
 
 // POST login
 router.post('/Login', function (req, res, next) {
-  var username = req.body.username;
-  var password = req.body.password;
+  var username = sanitizeHtml(req.body.username);
+  var password = sanitizeHtml(req.body.password);
 
   if (username && password) {
     // Use parameterized queries to avoid SQL injection
@@ -102,11 +109,17 @@ router.post('/Login', function (req, res, next) {
       if (data.length > 0) {
         const user = data[0]; // Get the first user from the result set
 
-        // Compare plain text password
-        if (user.password === password) { // Ideally, hash and compare passwords
-          req.session.userid = user.id; // Store user ID in session
-          console.log(req.session.userid);
-          return res.json({ success: true, id: req.session.userid });
+        // Compare password hashes
+        verifyPassword(password, user.password, user.salt);
+
+        if (verifyPassword) {
+          req.session.regenerate((err) => {
+            if (err) {
+              return res.status(500).send('Session regeneration failed');
+            }
+            req.session.userid = user.id;// Set user data in session
+            return res.json({ success: true, id: req.session.userid });
+          });
         } else {
           return res.json({ success: false, errorMessage: 'Incorrect password. Please enter a valid password!' });
         }
@@ -121,7 +134,10 @@ router.post('/Login', function (req, res, next) {
 
 //Sign Up
 router.post('/registerUser', (req, res) => {
-  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = req.body;
+  const { first_name, last_name, dob, country, language, mobile, email, password, vaccinated } = sanitizeHtml(req.body);
+
+  const { salt, hashedPassword } = hashPassword(password);
+  console.log(salt + "  " + hashedPassword);
 
   req.pool.getConnection((err, connection) => {
     if (err) {
@@ -131,8 +147,8 @@ router.post('/registerUser', (req, res) => {
     }
 
     // Insert the new user
-    const sql = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    connection.query(sql, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (err, results) => {
+    const sql = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, salt, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    connection.query(sql, [first_name, last_name, dob, country, language, mobile, email, salt, hashedPassword, vaccinated], (err, results) => {
       if (err) {
         console.log(err);
         connection.release();
@@ -141,10 +157,27 @@ router.post('/registerUser', (req, res) => {
       }
 
       const user_id = results.insertId;
-      req.session.user_id = user_id;
-      connection.release();
-      res.status(200).json({ success: true, user_id: req.session.user_id, message: 'User registered successfully!' });
+      req.session.regenerate((err) => {
+        if (err) {
+          return res.status(500).send('Session regeneration failed');
+        }
+        req.session.userid = user_id;// Set user data in session
+        connection.release();
+        res.status(200).json({ success: true, user_id: req.session.user_id, message: 'User registered successfully!' });
+      });
     });
+  });
+});
+
+// Logout
+router.get('/logout', function (req, res, next) {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send('Failed to log out');
+    }
+    res.clearCookie('connect.sid'); // Clear the session cookie
+    res.redirect('/login');
+    res.send('Logged out successfully');
   });
 });
 
@@ -245,7 +278,7 @@ router.get('/auth/failure', function (req, res) {
 
 //OAuth Signup
 router.post('/registerUserGOauth', (req, res) => {
-  const { first_name, last_name, dob, country, language, mobile, email, vaccinated } = req.body;
+  const { first_name, last_name, dob, country, language, mobile, email, vaccinated } = sanitizeHtml(req.body);
 
   req.pool.getConnection(function (err, connection) {
     if (err) {
@@ -270,8 +303,11 @@ router.post('/registerUserGOauth', (req, res) => {
         const password = generatePassword(12); // Set length as per OWASP 8 - minimum, 12 - improved security
         console.log(password);
 
-        const insertUserQuery = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        connection.query(insertUserQuery, [first_name, last_name, dob, country, language, mobile, email, password, vaccinated], (insertError) => {
+        const { salt, hashedPassword } = hashPassword(password);
+        console.log(salt + "        " + hashedPassword);
+
+        const insertUserQuery = 'INSERT INTO users (first_name, last_name, dob, country, language, mobile, email, salt, password, vaccinated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);';
+        connection.query(insertUserQuery, [first_name, last_name, dob, country, language, mobile, email, salt, hashedPassword, vaccinated], (insertError) => {
           if (insertError) {
             connection.release();
             console.log(insertError);
@@ -288,8 +324,14 @@ router.post('/registerUserGOauth', (req, res) => {
             }
 
             if (newData.length > 0) {
-              req.session.userid = newData[0].id;
-              res.status(200).json({ success: true, id: req.session.userid, message: 'User registered successfully!' });
+              //req.session.regenerate(); //Security feature -
+              req.session.regenerate((err) => {
+                if (err) {
+                  return res.status(500).send('Session regeneration failed');
+                }
+                req.session.userid = newData[0].id; // Set user data in session
+                res.status(200).json({ success: true, id: req.session.userid, message: 'User registered successfully!' });
+              });
             } else {
               res.json({ success: false, message: 'Registration error. Please try authentication again!' });
             }
@@ -303,9 +345,7 @@ router.post('/registerUserGOauth', (req, res) => {
 // OAuth Login
 router.post('/userLoginGOAuth', function (req, res, next) {
 
-  console.log("abc");
-  var username = req.body.user.email;
-  console.log("user" + username);
+  var username = sanitizeHtml(req.body.user.email);
 
   if (username) {
     var query = `SELECT * FROM users WHERE email = "${username}"`;
@@ -317,8 +357,13 @@ router.post('/userLoginGOAuth', function (req, res, next) {
       }
 
       if (data.length > 0) {
-        req.session.userid = data[0].id;
-        res.json({ success: true, user_id: req.session.userid });
+        req.session.regenerate((err) => {
+          if (err) {
+            return res.status(500).send('Session regeneration failed');
+          }
+          req.session.userid = data[0].id; // Set user data in session
+          res.json({ success: true, user_id: req.session.userid });
+        });
       } else {
         res.json({ success: false, check: true, message: 'Please sign in before login!' });
       }
@@ -326,12 +371,6 @@ router.post('/userLoginGOAuth', function (req, res, next) {
   } else {
     res.json({ success: false, message: 'Invalid username!' });
   }
-});
-
-// Render form to get vaccination details while OAuth signin
-router.get('/getVacDetails', (req, res) => {
-  var filePath = path.join(__dirname, '..', 'public', 'VacDetailsForm.html'); // Form to obtain vaccination details
-  res.sendFile(filePath);
 });
 
 router.post('/submitForm', function (req, res, next) {
@@ -349,16 +388,18 @@ router.post('/submitForm', function (req, res, next) {
     state,
     country,
     pin,
-    note
-  } = req.body;
+    note,
+    consent,
+    symptoms
+  } = sanitizeHtml(req.body);
 
   // Basic Validation (check required fields)
   if (!firstName || !lastName || !email || !contact || !servicetype || !date) {
     return res.status(400).send({ message: 'Please fill all required fields.' });
   }
 
-  const sql = `INSERT INTO general_special_service(firstName, lastName, email, contact, servicetype, dates, preferedCost, hours, street, suburb, state, country, pin, note)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const sql = `INSERT INTO general_special_service(firstName, lastName, email, contact, servicetype, dates, preferedCost, hours, street, suburb, state, country, pin, note, consent, symptoms)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [
     firstName,
@@ -374,7 +415,9 @@ router.post('/submitForm', function (req, res, next) {
     state,
     country,
     pin,
-    note
+    note,
+    consent,
+    symptoms
   ];
 
   req.pool.query(sql, values, (err, result) => {
@@ -443,162 +486,34 @@ function generatePassword(length) {
 
 //Password Hash (Using the crypto dependency)
 function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex'); // Generate a random salt
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha256').toString('hex'); // Hash the password with the salt
-  return { salt: salt, hash: hash };
+  // Generate a random salt
+  const salt = crypto.randomBytes(16).toString('hex');
+  console.log(salt);
+  if (!salt) {
+    console.error("Failed to generate salt.");
+    return null; // Return null if the salt couldn't be generated.
+  }
+
+  // Hash the password with the salt using pbkdf2Sync
+  const hashedPassword = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha256').toString('hex');
+  return { salt, hashedPassword };
 }
 
-// // Submit form for ondemand service
-// router.post('/submitOnDemand', function(req, res, next) {
-//   const {
-//     serviceType,
-//     serviceDay,
-//     times,
-//     preferedCost = 0,
-//     servicePerson,
-//     street,
-//     suburb,
-//     state,
-//     country,
-//     pin,
-//     note
-//   } = req.body;
-
-//   const user_id = req.session.userid;
-//   console.log(user_id);
-
-
-//   const sql = `INSERT INTO on_demand_service (user_id, servicetype, serviceday, timeslot, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
-//               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-//   const values = [
-//     user_id,
-//     serviceType,
-//     serviceDay,
-//     times,
-//     preferedCost,
-//     servicePerson,
-//     street,
-//     suburb,
-//     state,
-//     country,
-//     pin,
-//     note
-//   ];
-
-//   req.pool.query(sql, values, (err, result) => {
-//     console.log(result);
-//     if (err) {
-//       console.log(err);
-//       res.status(500).send({ message: 'Error inserting data', error: err });
-//     } else {
-//       res.status(200).send({ message: 'Form submitted successfully!' });
-//     }
-//   });
-// });
-
-// // Submit form for ondemand service
-// router.post('/submitOnDemand', function (req, res, next) {
-//   const {
-//     serviceType,
-//     email,
-//     date,
-
-//     serviceday,
-//     times,
-//     preferedCost,
-
-//     servicePerson,
-//     street,
-//     suburb,
-//     state,
-//     country,
-//     pin,
-//     note
-//   } = req.body;
-
-//   const user_id = req.session.userid;
-//   console.log(servicetype);
-
-//   // If times is an array, we can store it as a JSON string in the database
-//   const timesFormatted = JSON.stringify(times);
-
-//   const sql = `INSERT INTO on_demand_service (servicetype,email, date, times, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
-//               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-//   const values = [
-//     serviceType,
-//     email,
-//     date,
-//     timesFormatted, // Save times as a JSON string
-//     preferedCost || 0, // Default to 0 if not provided
-//     user_id,
-
-//     serviceday,
-//     JSON.stringify(times),
-//     preferedCost,
-//     servicePerson,
-//     street,
-//     suburb,
-//     state,
-//     country,
-//     pin,
-//     note
-//   ];
-
-//   req.pool.query(sql, values, (err, result) => {
-//     if (err) {
-//       console.error('Error inserting data:', err);
-//       res.status(500).send({ message: 'Error inserting data into the database.', error: err });
-//     } else {
-//       console.log('Data inserted successfully:', result);
-//       const esql = "SELECT email FROM users WHERE id = ?"
-
-//       req.pool.query(esql, user_id, (err, result) => {
-//         // let serviceDate = '';
-//         // const date = new Date();
-//         // let day = date.getDate();
-//         // if (serviceday === 'same') {
-//         //   serviceDate = day + '-' + date.getMonth() + '-' + date.getFullYear();
-//         // } else {
-//         //   day += 1;
-//         //   serviceDate = day + '-' + date.getMonth() + '-' + date.getFullYear();
-//         // }
-//         console.log(result);
-//         if (err) {
-//           console.log(err);
-//           res.status(500).send({ message: 'Error fetching email!', error: err });
-//         } else {
-//           const recipientEmails = result.map(u => u.email);
-//           const subject = `[HomeCarePro] - Booking Recieved: ${servicetype}`;
-//           const message = `
-//           Hi,
-
-//           We have successfully recieved your booking! Please review the details below:
-
-//           ${servicetype}
-//           Date: ${date}
-//           Time: ${times}
-//           Preference: ${servicePerson}
-
-//           We will try and send a service person that is of your preference but please be informed that itis not always possible to satisfy that condition.`;
-//           sendEmailNotification(recipientEmails, subject, message);
-//         }
-//       });
-
-//       res.status(200).send({ message: 'Form submitted successfully! Please check your email for details.' });
-//     }
-//   });
-// });
-
+// Verify hashed password
+function verifyPassword(password, hash, salt) {
+  const hashToVerify = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha256').toString('hex');
+  return hash === hashToVerify;
+}
 
 // Submit form for ondemand service
 router.post('/submitOnDemand', function (req, res, next) {
   const {
-    serviceType,
+    servicetype,
+    firstName,
+    lastName,
+    contact,
     email,
     date,
-    serviceday,
     times,
     preferedCost,
     servicePerson,
@@ -607,65 +522,71 @@ router.post('/submitOnDemand', function (req, res, next) {
     state,
     country,
     pin,
-    note
-  } = req.body;
+    note,
+    consent,
+    symptoms
+  } = sanitizeHtml(req.body);
 
   const user_id = req.session.userid;
-  console.log("Service Type:", serviceType);
+  console.log(servicetype);
 
-  // Convert `times` to JSON if it’s an array
-  const timesFormatted = JSON.stringify(times);
 
-  const sql = `INSERT INTO on_demand_service
-                (servicetype, email, date, times, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const sql = `INSERT INTO on_demand_service (user_id, servicetype, firstName, lastName, contact, email, date, times, preferedCost, serviceperson, street, suburb, state, country, pin, issue_desc, consent, symptoms)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
 
   const values = [
-    serviceType,
+    user_id,
+    servicetype,
+    firstName,
+    lastName,
+    contact,
     email,
     date,
-    timesFormatted, // Save times as a JSON string
-    preferedCost || 0, // Default to 0 if not provided
+    times,
+    preferedCost,
     servicePerson,
     street,
     suburb,
     state,
     country,
     pin,
-    note
+    note,
+    consent,
+    symptoms
   ];
 
   req.pool.query(sql, values, (err, result) => {
+    console.log(result);
     if (err) {
-      console.error('Error inserting data:', err);
-      res.status(500).send({ message: 'Error inserting data into the database.', error: err });
+      console.log(err);
+      res.status(500).send({ message: 'Error inserting data', error: err });
     } else {
-      console.log('Data inserted successfully:', result);
+      const esql = "SELECT email FROM users WHERE id = ?"
 
-      const esql = "SELECT email FROM users WHERE id = ?";
-      req.pool.query(esql, [user_id], (err, result) => {
+      req.pool.query(esql, user_id, (err, result) => {
+        console.log(result);
         if (err) {
           console.log(err);
           res.status(500).send({ message: 'Error fetching email!', error: err });
         } else {
           const recipientEmails = result.map(u => u.email);
-          const subject = `[HomeCarePro] - Booking Received: ${serviceType}`;
+          const subject = `[HomeCarePro] - Booking Recieved: ${servicetype}`;
           const message = `
           Hi,
 
-          We have successfully received your booking! Please review the details below:
+          We have successfully recieved your booking! Please review the details below:
 
-          Service Type: ${serviceType}
+          ${servicetype}
           Date: ${date}
-          Time: ${timesFormatted}
+          Time: ${times}
           Preference: ${servicePerson}
 
-          We will try and send a service person of your preference, but please be informed that it is not always possible to meet this preference.`;
-
+          We will try and send a service person that is of your preference but please be informed that itis not always possible to satisfy that condition.`;
           sendEmailNotification(recipientEmails, subject, message);
-          res.status(200).send({ message: 'Form submitted successfully! Please check your email for details.' });
         }
       });
+
+      res.status(200).send({ message: 'Form submitted successfully! Please check your email for details.' });
     }
   });
 });
@@ -704,6 +625,10 @@ function sendEmailNotification(recipients, subject, message) {
 router.post('/submitPackage', function (req, res, next) {
   const {
     package,
+    firstName,
+    lastName,
+    contact,
+    email,
     servicePerson,
     date,
     time,
@@ -717,16 +642,20 @@ router.post('/submitPackage', function (req, res, next) {
     note,
     consent,
     symptoms
-  } = req.body;
+  } = sanitizeHtml(req.body);
 
   const user_id = req.session.userid;
 
-  const sql = `INSERT INTO package_service(user_id, package, servicePerson, date, time, additionalServices, safetyPreferences, street, suburb, state, country, pin, note, consent, symptoms)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const sql = `INSERT INTO package_service(user_id, package, firstName, lastName, contact, email, servicePerson, date, time, additionalServices, safetyPreferences, street, suburb, state, country, pin, note, consent, symptoms)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [
     user_id,
     package,
+    firstName,
+    lastName,
+    contact,
+    email,
     servicePerson,
     date,
     time,
@@ -779,6 +708,5 @@ router.post('/submitPackage', function (req, res, next) {
     }
   });
 });
-
 
 module.exports = router;
