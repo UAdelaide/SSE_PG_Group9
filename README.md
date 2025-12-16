@@ -21,11 +21,11 @@ username: 'joel.olson@ethereal.email',
 
 3. When logged in successfully, go to Messages tab (which should be empty).
 
-4. Go to our project website (HomeCarePro) and log in as a user, using the credentials 	below.
+4. Go to our project website (HomeCarePro) and log in as a user, using the credentials below or via google authentication.
 
-	Username: tanveer@gmail.com
+	Username: sharlene@gmail.com
 
-	Password: password293
+	Password: password323
 
 5. Navigate to the required service form and fill and submit the form
 
